@@ -1,10 +1,10 @@
-package advanced.software.engineering.DMS;
+package AdvSe.LMS;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DmsApplicationTests {
+class LmsApplicationTests {
 
 	@Test
 	void contextLoads() {
