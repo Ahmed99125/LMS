@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -28,6 +30,14 @@ public class CloudinaryService {
         log.info("Uploaded file: {}", uploadResult.toString());
         CloudinaryFile cloudinaryFile = new CloudinaryFile(uploadResult.get("public_id").toString(), uploadResult.get("url").toString(), uploadResult.get("type").toString());
         return cloudinaryRepository.save(cloudinaryFile);
+    }
+
+    public List<CloudinaryFile> uploadMultipleFiles(List<MultipartFile> files, String folder) throws IOException {
+        List<CloudinaryFile> result = new ArrayList<>();
+        for (MultipartFile file : files) {
+            result.add(uploadFile(file, folder));
+        }
+        return result;
     }
 
     public String deleteFile(String publicId) throws IOException {

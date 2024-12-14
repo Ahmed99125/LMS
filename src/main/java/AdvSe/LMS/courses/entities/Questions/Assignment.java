@@ -71,6 +71,10 @@ public class Assignment {
         assignmentFiles.add(assignmentFile);
     }
 
+    public void setAssignmentFiles(List<CloudinaryFile> assignmentFiles) {
+        this.assignmentFiles = assignmentFiles;
+    }
+
     public void removeAssignmentFile(CloudinaryFile assignmentFile) {
         assignmentFiles.remove(assignmentFile);
     }
