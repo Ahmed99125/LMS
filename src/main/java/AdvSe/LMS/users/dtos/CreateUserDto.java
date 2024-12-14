@@ -1,10 +1,13 @@
 package AdvSe.LMS.users.dtos;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class CreateUserDto {
     private String id;
     private String name;
     private String password;
     private String role;
+    private MultipartFile image;
 
     public CreateUserDto() {
     }
@@ -46,5 +49,13 @@ public class CreateUserDto {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public MultipartFile getImage() {
+        return image;
+    }
+
+    public void setImage(MultipartFile image) {
+        this.image = image;
     }
 }

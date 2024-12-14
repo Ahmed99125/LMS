@@ -27,7 +27,7 @@ public class UsersController {
 
     @PostMapping("/students")
     @ResponseStatus(HttpStatus.CREATED)
-    public Student createStudent(@RequestBody CreateUserDto studentDto) {
+    public Student createStudent(@ModelAttribute CreateUserDto studentDto) {
         return userService.createStudent(studentDto);
     }
 }

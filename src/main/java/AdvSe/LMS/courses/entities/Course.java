@@ -46,6 +46,7 @@ public class Course {
 
     public Course() {
     }
+
     public Course(Integer id, String name, String description, String courseCode, Instructor instructor) {
         this.id = id;
         this.name = name;

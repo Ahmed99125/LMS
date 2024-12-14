@@ -1,7 +1,6 @@
 package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.users.entities.Instructor;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,8 +10,13 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private QuestionType type;
+
+    @Column(nullable = false)
     private String question;
+
+    @Column(nullable = false)
     private String answer;
 
     @ManyToOne
@@ -21,6 +25,7 @@ public class Question {
 
     public Question() {
     }
+
     public Question(Integer id, QuestionType type, String question, String answer, Course course) {
         this.id = id;
         this.type = type;

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "instructors")
-public class Instructor extends User{
+public class Instructor extends User {
 
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses = new ArrayList<>();

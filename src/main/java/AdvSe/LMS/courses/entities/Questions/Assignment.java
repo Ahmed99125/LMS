@@ -1,5 +1,6 @@
 package AdvSe.LMS.courses.entities.Questions;
 
+import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import jakarta.persistence.*;
 
@@ -13,20 +14,28 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private String name;
-    private String data;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "assignment_files",
+            joinColumns = @JoinColumn(name = "assignment_id"),
+            inverseJoinColumns = @JoinColumn(name = "file_id")
+    )
+    private List<CloudinaryFile> assignmentFiles = new ArrayList<>();
+
 
     public Assignment() {
     }
-    public Assignment(Integer id, String name, String data, Course course) {
+
+    public Assignment(Integer id, String name, Course course) {
         this.id = id;
         this.name = name;
-        this.data = data;
         this.course = course;
     }
 
@@ -46,19 +55,23 @@ public class Assignment {
         this.name = name;
     }
 
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
-
     public Course getCourse() {
         return course;
     }
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public List<CloudinaryFile> getAssignmentFiles() {
+        return assignmentFiles;
+    }
+
+    public void addAssignmentFile(CloudinaryFile assignmentFile) {
+        assignmentFiles.add(assignmentFile);
+    }
+
+    public void removeAssignmentFile(CloudinaryFile assignmentFile) {
+        assignmentFiles.remove(assignmentFile);
     }
 }

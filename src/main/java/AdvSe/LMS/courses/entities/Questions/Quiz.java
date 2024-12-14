@@ -1,7 +1,6 @@
 package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.users.entities.Student;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne
@@ -30,6 +30,7 @@ public class Quiz {
 
     public Quiz() {
     }
+
     public Quiz(Integer id, String name, Course course) {
         this.id = id;
         this.name = name;

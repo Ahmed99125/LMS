@@ -1,8 +1,7 @@
 package AdvSe.LMS.users.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import AdvSe.LMS.cloudinary.CloudinaryFile;
+import jakarta.persistence.*;
 
 @MappedSuperclass
 public class User {
@@ -22,12 +21,14 @@ public class User {
 
     private String phone;
 
-    private String profilePicture;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_picture_id")
+    private CloudinaryFile profilePicture;
 
     public User() {
     }
 
-    public User(String id, String name, String password, String role, String email, String phone, String profilePicture) {
+    public User(String id, String name, String password, String role, String email, String phone, CloudinaryFile profilePicture) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -85,11 +86,11 @@ public class User {
         this.phone = phone;
     }
 
-    public String getProfilePicture() {
+    public CloudinaryFile getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(String profilePicture) {
+    public void setProfilePicture(CloudinaryFile profilePicture) {
         this.profilePicture = profilePicture;
     }
 }

@@ -1,5 +1,6 @@
 package AdvSe.LMS.courses.entities.Lessons;
 
+import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.users.entities.Student;
 import jakarta.persistence.*;
@@ -14,13 +15,20 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private String name;
-
-    private String data;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "lesson_files",
+            joinColumns = @JoinColumn(name = "lesson_id"),
+            inverseJoinColumns = @JoinColumn(name = "file_id")
+    )
+    private List<CloudinaryFile> lessonFiles = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -32,10 +40,10 @@ public class Lesson {
 
     public Lesson() {
     }
-    public Lesson(Integer id, String name, String data, Course course) {
+
+    public Lesson(Integer id, String name, Course course) {
         this.id = id;
         this.name = name;
-        this.data = data;
         this.course = course;
     }
 
@@ -53,14 +61,6 @@ public class Lesson {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
     }
 
     public Course getCourse() {
@@ -81,5 +81,17 @@ public class Lesson {
 
     public void removeStudent(Student student) {
         attendance.remove(student);
+    }
+
+    public List<CloudinaryFile> getLessonFiles() {
+        return lessonFiles;
+    }
+
+    public void addLessonFile(CloudinaryFile lessonFile) {
+        lessonFiles.add(lessonFile);
+    }
+
+    public void removeLessonFile(CloudinaryFile lessonFile) {
+        lessonFiles.remove(lessonFile);
     }
 }
