@@ -2,7 +2,7 @@ package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.enums.Role;
+import AdvSe.LMS.utils.enums.Role;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;

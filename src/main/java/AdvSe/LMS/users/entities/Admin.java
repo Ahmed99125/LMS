@@ -1,7 +1,7 @@
 package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
-import AdvSe.LMS.enums.Role;
+import AdvSe.LMS.utils.enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;

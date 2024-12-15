@@ -45,7 +45,7 @@ public class AssignmentsController {
     Assignment postAssignment(
             @PathVariable("course_id") Integer course_id,
             @RequestPart("data") String name,
-            @RequestPart("files")List<MultipartFile> files) {
+            @RequestPart("files") List<MultipartFile> files) {
         return assignmentsService.createAssignment(course_id, name, files);
     }
 
@@ -53,7 +53,7 @@ public class AssignmentsController {
     Assignment updateAssignment(
             @PathVariable("assignment_id") Integer assignment_id,
             @RequestPart("data") String name,
-            @RequestPart("files")List<MultipartFile> files) {
+            @RequestPart("files") List<MultipartFile> files) {
         return assignmentsService.updateAssignment(assignment_id, name, files);
     }
 

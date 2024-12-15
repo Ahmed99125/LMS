@@ -1,4 +1,4 @@
-package AdvSe.LMS.enums;
+package AdvSe.LMS.utils.enums;
 
 public enum Role {
     ADMIN,

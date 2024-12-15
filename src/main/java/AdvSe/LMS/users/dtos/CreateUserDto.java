@@ -1,6 +1,6 @@
 package AdvSe.LMS.users.dtos;
 
-import AdvSe.LMS.enums.Role;
+import AdvSe.LMS.utils.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

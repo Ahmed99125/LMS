@@ -1,7 +1,8 @@
 package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
-import AdvSe.LMS.enums.Role;
+import AdvSe.LMS.utils.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class User {
     private String name;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)

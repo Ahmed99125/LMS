@@ -1,7 +1,8 @@
 package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.enums.QuestionType;
+import AdvSe.LMS.utils.enums.QuestionType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,6 +28,7 @@ public class Question {
     private String question;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String answer;
 
     @ManyToOne
