@@ -1,4 +1,4 @@
-package AdvSe.LMS.courses;
+package AdvSe.LMS.courses.services;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.cloudinary.CloudinaryService;
@@ -23,28 +23,38 @@ public class AssignmentsService {
     private final CoursesRepository courseRepository;
     private final CloudinaryService cloudinaryService;
 
-    AssignmentsService(AssignmentsRepository assignmentsRepository,
-                       CoursesRepository courseRepository, CloudinaryService cloudinaryService) {
+    AssignmentsService(AssignmentsRepository assignmentsRepository, CoursesRepository courseRepository, CloudinaryService cloudinaryService) {
         this.assignmentsRepository = assignmentsRepository;
         this.courseRepository = courseRepository;
         this.cloudinaryService = cloudinaryService;
     }
 
+    public Assignment getAssignmentById(Integer course_id, Integer assignment_id) {
+        Course course = courseRepository.findById(course_id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+
+        Assignment assignment = assignmentsRepository.findById(assignment_id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Assignment not found"));
+
+        if (assignment.getCourse().getId().equals(course_id))
+            throw new ResponseStatusException(NOT_FOUND, "Assignment not found");
+
+        return assignment;
+    }
+
     public List<Assignment> getAssignmentsByCourseId(Integer course_id) {
-        Optional<Course> course = courseRepository.findById(course_id);
+        Course course = courseRepository.findById(course_id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
-        if (course.isEmpty())
-            return null;
-
-        return course.get().getAssignments();
+        return course.getAssignments();
     }
 
     public Assignment createAssignment(Integer course_id, String name, List<MultipartFile> files) {
-        Optional<Course> course = courseRepository.findById(course_id);
-        if (course.isEmpty())
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
+        Course course = courseRepository.findById(course_id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+
         Assignment assignment = new Assignment();
-        assignment.setCourse(course.get());
+        assignment.setCourse(course);
         assignment.setName(name);
         try {
             List<CloudinaryFile> cloudinaryFiles = cloudinaryService.uploadMultipleFiles(files, "assignments");
@@ -57,11 +67,9 @@ public class AssignmentsService {
         return assignmentsRepository.save(assignment);
     }
 
-    public Assignment updateAssignment(Integer assignment_id, String name, List<MultipartFile> files) {
-        Optional<Assignment> opt_assignment = assignmentsRepository.findById(assignment_id);
-        if (opt_assignment.isEmpty())
-            throw new ResponseStatusException(NOT_FOUND, "Assignment not found");
-        Assignment assignment = opt_assignment.get();
+    public Assignment updateAssignment(Integer course_id, Integer assignment_id, String name, List<MultipartFile> files) {
+        Assignment assignment = getAssignmentById(course_id, assignment_id);
+
         assignment.setName(name);
         try {
             List<CloudinaryFile> cloudinaryFiles = cloudinaryService.uploadMultipleFiles(files, "assignments");
