@@ -4,10 +4,18 @@ import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.users.entities.Student;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "lessons")
 public class Lesson {
@@ -22,7 +30,7 @@ public class Lesson {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "lesson_files",
             joinColumns = @JoinColumn(name = "lesson_id"),
@@ -38,53 +46,12 @@ public class Lesson {
     )
     private List<Student> attendance = new ArrayList<>();
 
-    public Lesson() {
-    }
-
-    public Lesson(Integer id, String name, Course course) {
-        this.id = id;
-        this.name = name;
-        this.course = course;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public List<Student> getAttendance() {
-        return attendance;
-    }
-
     public void addStudent(Student student) {
         attendance.add(student);
     }
 
     public void removeStudent(Student student) {
         attendance.remove(student);
-    }
-
-    public List<CloudinaryFile> getLessonFiles() {
-        return lessonFiles;
     }
 
     public void addLessonFile(CloudinaryFile lessonFile) {

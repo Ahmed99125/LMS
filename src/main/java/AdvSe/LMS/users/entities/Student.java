@@ -1,11 +1,19 @@
 package AdvSe.LMS.users.entities;
 
+import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
+import AdvSe.LMS.enums.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "students")
 public class Student extends User {
@@ -18,6 +26,11 @@ public class Student extends User {
     )
     private List<Course> courses = new ArrayList<>();
 
+    public Student(String id, String name, String password, Role role, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
+        super(id, name, password, role, email, phone, profilePicture);
+        this.courses = courses;
+    }
+
     public void addCourse(Course course) {
         courses.add(course);
         course.addStudent(this);
@@ -26,9 +39,5 @@ public class Student extends User {
     public void removeCourse(Course course) {
         courses.remove(course);
         course.removeStudent(this);
-    }
-
-    public List<Course> getCourses() {
-        return courses;
     }
 }

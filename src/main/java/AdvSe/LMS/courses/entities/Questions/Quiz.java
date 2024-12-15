@@ -2,10 +2,18 @@ package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "quizzes")
 public class Quiz {
@@ -27,43 +35,6 @@ public class Quiz {
             inverseJoinColumns = @JoinColumn(name = "question_id")
     )
     private List<Question> questions = new ArrayList<>();
-
-    public Quiz() {
-    }
-
-    public Quiz(Integer id, String name, Course course) {
-        this.id = id;
-        this.name = name;
-        this.course = course;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public List<Question> getQuestions() {
-        return questions;
-    }
 
     public void addQuestion(Question question) {
         questions.add(question);

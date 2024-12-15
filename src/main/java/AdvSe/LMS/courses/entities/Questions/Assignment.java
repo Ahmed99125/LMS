@@ -3,10 +3,18 @@ package AdvSe.LMS.courses.entities.Questions;
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "assignments")
 public class Assignment {
@@ -21,7 +29,7 @@ public class Assignment {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "assignment_files",
             joinColumns = @JoinColumn(name = "assignment_id"),
@@ -29,50 +37,8 @@ public class Assignment {
     )
     private List<CloudinaryFile> assignmentFiles = new ArrayList<>();
 
-
-    public Assignment() {
-    }
-
-    public Assignment(Integer id, String name, Course course) {
-        this.id = id;
-        this.name = name;
-        this.course = course;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public List<CloudinaryFile> getAssignmentFiles() {
-        return assignmentFiles;
-    }
-
     public void addAssignmentFile(CloudinaryFile assignmentFile) {
         assignmentFiles.add(assignmentFile);
-    }
-
-    public void setAssignmentFiles(List<CloudinaryFile> assignmentFiles) {
-        this.assignmentFiles = assignmentFiles;
     }
 
     public void removeAssignmentFile(CloudinaryFile assignmentFile) {

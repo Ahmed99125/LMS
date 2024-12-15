@@ -7,10 +7,18 @@ import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "courses")
 public class Course {
@@ -44,28 +52,7 @@ public class Course {
     @ManyToMany(mappedBy = "courses")
     private List<Student> students = new ArrayList<>();
 
-    public Course() {
-    }
 
-    public Course(Integer id, String name, String description, String courseCode, Instructor instructor) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.courseCode = courseCode;
-        this.instructor = instructor;
-    }
-
-    public Instructor getInstructor() {
-        return instructor;
-    }
-
-    public void setInstructor(Instructor instructor) {
-        this.instructor = instructor;
-    }
-
-    public List<Student> getStudents() {
-        return students;
-    }
 
     public void addStudent(Student student) {
         students.add(student);
@@ -73,10 +60,6 @@ public class Course {
 
     public void removeStudent(Student student) {
         students.remove(student);
-    }
-
-    public List<Lesson> getLessons() {
-        return lessons;
     }
 
     public void addLesson(Lesson lesson) {
@@ -88,10 +71,6 @@ public class Course {
         lessons.remove(lesson);
     }
 
-    public List<Question> getQuestions() {
-        return questions;
-    }
-
     public void addQuestion(Question question) {
         questions.add(question);
         question.setCourse(this);
@@ -101,10 +80,6 @@ public class Course {
         questions.remove(question);
     }
 
-    public List<Quiz> getQuizzes() {
-        return quizzes;
-    }
-
     public void addQuiz(Quiz quiz) {
         quizzes.add(quiz);
         quiz.setCourse(this);
@@ -112,10 +87,6 @@ public class Course {
 
     public void removeQuiz(Quiz quiz) {
         quizzes.remove(quiz);
-    }
-
-    public List<Assignment> getAssignments() {
-        return assignments;
     }
 
     public void addAssignment(Assignment assignment) {

@@ -1,4 +1,4 @@
-package AdvSe.LMS.courses.entities.Questions;
+package AdvSe.LMS.enums;
 
 public enum QuestionType {
     MULTIPLE_CHOICE,
