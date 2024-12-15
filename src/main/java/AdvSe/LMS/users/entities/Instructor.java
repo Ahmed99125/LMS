@@ -24,6 +24,9 @@ public class Instructor extends User {
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
     public Instructor(String id, String name, String password, Role role, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
         super(id, name, password, role, email, phone, profilePicture);
         this.courses = courses;
@@ -36,5 +39,13 @@ public class Instructor extends User {
 
     public void removeCourse(Course course) {
         courses.remove(course);
+    }
+
+    public void addNotification(Notification notification) {
+        notifications.add(notification);
+    }
+
+    public void removeNotification(Notification notification) {
+        notifications.remove(notification);
     }
 }
