@@ -11,6 +11,7 @@ import AdvSe.LMS.users.services.AdminsService;
 import AdvSe.LMS.users.services.InstructorsService;
 import AdvSe.LMS.users.services.StudentsService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +44,7 @@ public class UsersController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User register(@RequestBody CreateUserDto userDto) {
+    public User register(@Valid @RequestBody CreateUserDto userDto) {
         return switch (userDto.getRole()) {
             case STUDENT -> studentsService.createStudent(userDto);
             case INSTRUCTOR -> instructorService.createInstructor(userDto);
@@ -53,7 +54,7 @@ public class UsersController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto, HttpSession session) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginDto loginDto, HttpSession session) {
         if (loginDto.getUsername() == null || loginDto.getUsername().isEmpty() || loginDto.getPassword() == null || loginDto.getPassword().isEmpty()) {
             return ResponseEntity.badRequest().body("All fields must be filled: Username and password.");
         }
@@ -112,17 +113,17 @@ public class UsersController {
     }
 
     @PutMapping("/students/{id}")
-    public Student updateStudent(@PathVariable String id, @RequestBody CreateUserDto userDto) {
+    public Student updateStudent(@PathVariable String id, @Valid @RequestBody CreateUserDto userDto) {
         return studentsService.updateStudent(id, userDto);
     }
 
     @PutMapping("/instructors/{id}")
-    public Instructor updateInstructor(@PathVariable String id, @RequestBody CreateUserDto userDto) {
+    public Instructor updateInstructor(@PathVariable String id, @Valid @RequestBody CreateUserDto userDto) {
         return instructorService.updateInstructor(id, userDto);
     }
 
     @PutMapping("/admins/{id}")
-    public Admin updateAdmin(@PathVariable String id, @RequestBody CreateUserDto userDto) {
+    public Admin updateAdmin(@PathVariable String id, @Valid @RequestBody CreateUserDto userDto) {
         return adminService.updateAdmin(id, userDto);
     }
 

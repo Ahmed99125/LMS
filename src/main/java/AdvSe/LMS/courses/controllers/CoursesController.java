@@ -4,6 +4,7 @@ import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.courses.services.CoursesService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class CoursesController {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     Course postCourse(
-            @RequestBody CreateCourseDto createCourseDto
+            @Valid @RequestBody CreateCourseDto createCourseDto
     ) {
         return coursesService.createCourse(createCourseDto);
     }
@@ -41,7 +42,7 @@ public class CoursesController {
     @PutMapping("/{course_id}")
     Course updateCourse(
             @PathVariable("course_id") Integer course_id,
-            @RequestBody CreateCourseDto createCourseDto
+            @Valid @RequestBody CreateCourseDto createCourseDto
     ) {
         return coursesService.updateCourse(course_id, createCourseDto);
     }
