@@ -7,9 +7,9 @@ import AdvSe.LMS.users.entities.Student;
 import AdvSe.LMS.users.repositories.AdminsRepository;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
 import AdvSe.LMS.users.repositories.StudentsRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -24,11 +24,11 @@ public class UserService {
         this.instructorsRepository = instructorsRepository;
         this.adminsRepository = adminsRepository;
     }
-    
+
     // Add the hashed password instead at the end, this is just for the ease of testing
 
     public Student createStudent(CreateUserDto userDto) {
-    	Student user = new Student();
+        Student user = new Student();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String hashedPassword = passwordEncoder.encode(userDto.getPassword());
         user.setId(userDto.getId());
@@ -37,9 +37,9 @@ public class UserService {
         user.setRole(userDto.getRole());
         return studentsRepository.save(user);
     }
-    
+
     public Instructor createInstructor(CreateUserDto userDto) {
-    	Instructor user = new Instructor();
+        Instructor user = new Instructor();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String hashedPassword = passwordEncoder.encode(userDto.getPassword());
         user.setId(userDto.getId());
@@ -48,9 +48,9 @@ public class UserService {
         user.setRole(userDto.getRole());
         return instructorsRepository.save(user);
     }
-    
+
     public Admin createAdmin(CreateUserDto userDto) {
-    	Admin user = new Admin();
+        Admin user = new Admin();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String hashedPassword = passwordEncoder.encode(userDto.getPassword());
         user.setId(userDto.getId());
@@ -59,7 +59,7 @@ public class UserService {
         user.setRole(userDto.getRole());
         return adminsRepository.save(user);
     }
-    
+
     public String updateUser(String oldId, CreateUserDto userDto) {
         // Check the role from the incoming DTO
         switch (userDto.getRole()) {
@@ -121,8 +121,8 @@ public class UserService {
         instructorsRepository.save(updatedInstructor); // Save the updated entity
         return "updated";
     }
-    
-    public String deleteUser(String id) {      
+
+    public String deleteUser(String id) {
         if (adminsRepository.existsById(id)) {
             adminsRepository.deleteById(id);
             return "deleted";

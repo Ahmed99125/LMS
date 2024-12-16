@@ -7,7 +7,6 @@ import AdvSe.LMS.users.repositories.AdminsRepository;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
 import AdvSe.LMS.users.repositories.StudentsRepository;
 import jakarta.servlet.http.HttpSession;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,11 +19,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +42,23 @@ public class SecurityConfig {
         this.studentsRepository = studentsRepository;
     }
 
+    public static Authentication getLoggedInUser(HttpSession session) {
+        SecurityContext securityContext = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
+        Authentication auth = securityContext.getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            return auth;
+        }
+        return null;
+
+    }
+
     @Bean
     public AuthenticationProvider customAuthenticationProvider() {
         return new AuthenticationProvider() {
             @Override
-            
+
             // Should add the bcrypt compare but at the end so we can login easily while testing.
-            
+
             public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                 String username = authentication.getName();
                 String password = authentication.getCredentials().toString();
@@ -82,7 +90,8 @@ public class SecurityConfig {
                 }
 
                 // If no match is found, throw exception
-                throw new AuthenticationException("Invalid username or password") {};
+                throw new AuthenticationException("Invalid username or password") {
+                };
             }
 
             @Override
@@ -95,35 +104,24 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                   .authenticationProvider(customAuthenticationProvider())
-                   .build();
+                .authenticationProvider(customAuthenticationProvider())
+                .build();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/login").permitAll() // Allow login only if unauthenticated
-                .requestMatchers("/api/users/user", "/api/users/logout").authenticated() // Require authentication for /user and /logout
-                .requestMatchers("/api/users/students", "/api/users/instructors", "/api/users/admins", "/api/users/register", "/api/users/{id}/**").hasAuthority("ADMIN") // Only admins can access these routes
-                .anyRequest().authenticated() // All other requests require authentication
-            )
-            .sessionManagement()
+                .csrf().disable()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/users/login").permitAll() // Allow login only if unauthenticated
+                        .requestMatchers("/api/users/user", "/api/users/logout").authenticated() // Require authentication for /user and /logout
+                        .requestMatchers("/api/users/students", "/api/users/instructors", "/api/users/admins", "/api/users/register", "/api/users/{id}/**").hasAuthority("ADMIN") // Only admins can access these routes
+                        .anyRequest().authenticated() // All other requests require authentication
+                )
+                .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Allow sessions to be created
-            .and()
-            .httpBasic(); // Use HTTP Basic Authentication
+                .and()
+                .httpBasic(); // Use HTTP Basic Authentication
         return http.build();
-    }
-
-    
-    public static Authentication getLoggedInUser(HttpSession session) {
-    	SecurityContext securityContext = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
-    	Authentication auth = securityContext.getAuthentication();
-    	if (auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
-            return auth;
-        }
-        return null;
-    	
     }
 }

@@ -1,21 +1,15 @@
 package AdvSe.LMS.courses.services;
 
-import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service

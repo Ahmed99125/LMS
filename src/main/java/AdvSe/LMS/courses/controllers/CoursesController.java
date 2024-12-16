@@ -2,12 +2,10 @@ package AdvSe.LMS.courses.controllers;
 
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.courses.services.CoursesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,7 +32,7 @@ public class CoursesController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    Course postCourse (
+    Course postCourse(
             @RequestBody CreateCourseDto createCourseDto
     ) {
         return coursesService.createCourse(createCourseDto);
