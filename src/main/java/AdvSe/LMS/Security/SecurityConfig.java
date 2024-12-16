@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final AdminsRepository adminsRepository;
@@ -106,8 +108,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login").permitAll() // Allow login only if unauthenticated
-                        .requestMatchers("/api/users/user", "/api/users/logout").authenticated() // Require authentication for /user and /logout
-                        .requestMatchers("/api/users/students", "/api/users/instructors", "/api/users/admins", "/api/users/register", "/api/users/{id}/**").hasAuthority("ADMIN") // Only admins can access these routes
+                        .requestMatchers("/api/users/students/**", "/api/users/instructors/**", "/api/users/admins/**", "/api/users/register").hasAuthority("ADMIN") // Only admins can access these routes
                         .anyRequest().authenticated() // All other requests require authentication
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))

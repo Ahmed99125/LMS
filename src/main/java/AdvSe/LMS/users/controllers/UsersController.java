@@ -41,7 +41,6 @@ public class UsersController {
         this.authenticationManager = authenticationManager;
     }
 
-
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public User register(@Valid @RequestBody CreateUserDto userDto) {

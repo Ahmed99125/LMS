@@ -14,7 +14,6 @@ public class UsersService {
     public UsersService() {
     }
 
-
     public void setUserData(User user, CreateUserDto userDto) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String hashedPassword = passwordEncoder.encode(userDto.getPassword());

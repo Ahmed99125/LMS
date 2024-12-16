@@ -8,6 +8,7 @@ import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
 import AdvSe.LMS.users.repositories.StudentsRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -41,6 +42,7 @@ public class CoursesService {
         return CourseDto.fromList(courseRepository.findAll());
     }
 
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     public CourseDto createCourse(CreateCourseDto createCourseDto) {
         Instructor instructor = instructorsRepository.findById(createCourseDto.getInstructorId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
@@ -52,6 +54,7 @@ public class CoursesService {
         return new CourseDto(courseRepository.save(course));
     }
 
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     public CourseDto updateCourse(Integer course_id, CreateCourseDto createCourseDto) {
         Course course = getCourseById(course_id);
 
@@ -70,6 +73,7 @@ public class CoursesService {
 
     }
 
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     public void addStudentToCourse(Integer courseId, String studentId) {
         Course course = getCourseById(courseId);
         Student student = studentsRepository.findById(studentId)

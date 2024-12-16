@@ -4,6 +4,7 @@ import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.repositories.AssignmentsRepository;
 import AdvSe.LMS.courses.services.AssignmentsService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,6 +39,7 @@ public class AssignmentsController {
         return assignmentsService.getAssignmentById(course_id, assignment_id);
     }
 
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     Assignment postAssignment(
@@ -47,6 +49,7 @@ public class AssignmentsController {
         return assignmentsService.createAssignment(course_id, name, files);
     }
 
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PutMapping("/{assignment_id}")
     Assignment updateAssignment(
             @PathVariable("course_id") Integer course_id,
@@ -56,6 +59,7 @@ public class AssignmentsController {
         return assignmentsService.updateAssignment(course_id, assignment_id, name, files);
     }
 
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @DeleteMapping("/{assignment_id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteAssignment(
