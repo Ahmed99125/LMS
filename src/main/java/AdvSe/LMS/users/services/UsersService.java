@@ -2,6 +2,7 @@ package AdvSe.LMS.users.services;
 
 import AdvSe.LMS.users.dtos.CreateUserDto;
 import AdvSe.LMS.users.entities.User;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,8 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UsersService {
 
-
     public UsersService() {
+        
     }
 
     public void setUserData(User user, CreateUserDto userDto) {

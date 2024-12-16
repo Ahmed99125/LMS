@@ -1,8 +1,13 @@
 package AdvSe.LMS.users.services;
 
 import AdvSe.LMS.users.dtos.CreateUserDto;
+import AdvSe.LMS.users.dtos.UpdateProfileDto;
+import AdvSe.LMS.users.entities.Admin;
 import AdvSe.LMS.users.entities.Student;
 import AdvSe.LMS.users.repositories.StudentsRepository;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -47,5 +52,17 @@ public class StudentsService {
         if (!studentsRepository.existsById(studentId))
             throw new ResponseStatusException(NOT_FOUND, "Student not found");
         studentsRepository.deleteById(studentId);
+    }
+    
+    public Student updateProfile(String id, UpdateProfileDto profileDto) {
+        Student user = studentsRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Admin not found"));
+        
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setEmail(profileDto.getEmail());
+        user.setPassword(passwordEncoder.encode(profileDto.getPassword()));
+        user.setPhone(profileDto.getPhone());
+        user.setProfilePicture(profileDto.getProfilePicture());
+
+        return studentsRepository.save(user);
     }
 }
