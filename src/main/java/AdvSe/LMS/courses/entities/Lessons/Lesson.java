@@ -3,6 +3,7 @@ package AdvSe.LMS.courses.entities.Lessons;
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.users.entities.Student;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class Lesson {
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonBackReference
     private Course course;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

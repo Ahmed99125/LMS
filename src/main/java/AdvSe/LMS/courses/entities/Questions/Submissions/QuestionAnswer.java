@@ -1,6 +1,7 @@
 package AdvSe.LMS.courses.entities.Questions.Submissions;
 
 import AdvSe.LMS.courses.entities.Questions.Question;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,5 +27,6 @@ public class QuestionAnswer {
 
     @ManyToOne
     @JoinColumn(name = "submission_id", nullable = false)
+    @JsonBackReference
     private QuizSubmission quizSubmission;
 }

@@ -3,6 +3,7 @@ package AdvSe.LMS.users.entities;
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.utils.enums.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -22,9 +23,11 @@ import java.util.List;
 public class Instructor extends User {
 
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Course> courses = new ArrayList<>();
 
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Notification> notifications = new ArrayList<>();
 
     public Instructor(String id, String name, String password, Role role, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
@@ -34,7 +37,6 @@ public class Instructor extends User {
 
     public void addCourse(Course course) {
         courses.add(course);
-        course.setInstructor(this);
     }
 
     public void removeCourse(Course course) {

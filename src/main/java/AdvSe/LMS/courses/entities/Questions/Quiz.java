@@ -1,6 +1,8 @@
 package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +28,7 @@ public class Quiz {
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonBackReference
     private Course course;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -34,6 +37,7 @@ public class Quiz {
             joinColumns = @JoinColumn(name = "quiz_id"),
             inverseJoinColumns = @JoinColumn(name = "question_id")
     )
+    @JsonManagedReference
     private List<Question> questions = new ArrayList<>();
 
     public void addQuestion(Question question) {

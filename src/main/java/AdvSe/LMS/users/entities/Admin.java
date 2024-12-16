@@ -2,6 +2,7 @@ package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.utils.enums.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -21,6 +22,7 @@ import java.util.List;
 public class Admin extends User {
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Notification> notifications = new ArrayList<>();
 
     public Admin(String id, String name, String password, Role role, String email, String phone, CloudinaryFile profilePicture) {

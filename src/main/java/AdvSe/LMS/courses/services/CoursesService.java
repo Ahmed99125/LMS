@@ -1,10 +1,13 @@
 package AdvSe.LMS.courses.services;
 
+import AdvSe.LMS.courses.dtos.CourseDto;
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.users.entities.Instructor;
+import AdvSe.LMS.users.entities.Student;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
+import AdvSe.LMS.users.repositories.StudentsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,10 +19,12 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class CoursesService {
     private final CoursesRepository courseRepository;
     private final InstructorsRepository instructorsRepository;
+    private final StudentsRepository studentsRepository;
 
-    public CoursesService(CoursesRepository courseRepository, InstructorsRepository instructorsRepository) {
+    public CoursesService(CoursesRepository courseRepository, InstructorsRepository instructorsRepository, StudentsRepository studentsRepository) {
         this.courseRepository = courseRepository;
         this.instructorsRepository = instructorsRepository;
+        this.studentsRepository = studentsRepository;
     }
 
     public Course getCourseById(Integer course_id) {
@@ -27,11 +32,16 @@ public class CoursesService {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
     }
 
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+    public CourseDto getCourseDto(Integer course_id) {
+        Course course = getCourseById(course_id);
+        return new CourseDto(course);
     }
 
-    public Course createCourse(CreateCourseDto createCourseDto) {
+    public List<CourseDto> getAllCourses() {
+        return CourseDto.fromList(courseRepository.findAll());
+    }
+
+    public CourseDto createCourse(CreateCourseDto createCourseDto) {
         Instructor instructor = instructorsRepository.findById(createCourseDto.getInstructorId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
         Course course = new Course();
@@ -39,10 +49,10 @@ public class CoursesService {
         course.setInstructor(instructor);
         course.setDescription(createCourseDto.getDescription());
         course.setCourseCode(createCourseDto.getCourseCode());
-        return courseRepository.save(course);
+        return new CourseDto(courseRepository.save(course));
     }
 
-    public Course updateCourse(Integer course_id, CreateCourseDto createCourseDto) {
+    public CourseDto updateCourse(Integer course_id, CreateCourseDto createCourseDto) {
         Course course = getCourseById(course_id);
 
         if (createCourseDto.getName() != null)
@@ -56,7 +66,17 @@ public class CoursesService {
                     .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
             course.setInstructor(instructor);
         }
-        return courseRepository.save(course);
+        return new CourseDto(courseRepository.save(course));
 
+    }
+
+    public void addStudentToCourse(Integer courseId, String studentId) {
+        Course course = getCourseById(courseId);
+        Student student = studentsRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Student not found"));
+        course.addStudent(student);
+        student.addCourse(course);
+        courseRepository.save(course);
+        studentsRepository.save(student);
     }
 }

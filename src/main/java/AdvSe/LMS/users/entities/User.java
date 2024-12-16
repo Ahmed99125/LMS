@@ -46,4 +46,14 @@ public class User {
         this.phone = phone;
         this.profilePicture = profilePicture;
     }
+
+    public User(User user) {
+        this.id = user.getId();
+        this.name = user.getName();
+        this.password = user.getPassword();
+        this.role = user.getRole();
+        this.email = user.getEmail();
+        this.phone = user.getPhone();
+        this.profilePicture = user.getProfilePicture();
+    }
 }

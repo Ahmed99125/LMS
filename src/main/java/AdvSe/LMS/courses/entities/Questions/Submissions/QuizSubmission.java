@@ -2,6 +2,7 @@ package AdvSe.LMS.courses.entities.Questions.Submissions;
 
 import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.users.entities.Student;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,6 +32,7 @@ public class QuizSubmission {
     private Quiz quiz;
 
     @OneToMany(mappedBy = "quizSubmission", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<QuestionAnswer> answers = new ArrayList<>();
 
     private Double score;

@@ -1,5 +1,6 @@
 package AdvSe.LMS.users.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,13 +26,16 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "student_id")
+    @JsonBackReference
     private Student student;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")
+    @JsonBackReference
     private Instructor instructor;
 
     @ManyToOne
     @JoinColumn(name = "admin_id")
+    @JsonBackReference
     private Admin admin;
 }

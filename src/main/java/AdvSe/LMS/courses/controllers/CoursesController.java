@@ -1,5 +1,6 @@
 package AdvSe.LMS.courses.controllers;
 
+import AdvSe.LMS.courses.dtos.CourseDto;
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
@@ -22,29 +23,37 @@ public class CoursesController {
     }
 
     @GetMapping("/{course_id}")
-    Course getCourseById(@PathVariable("course_id") Integer course_id) {
-        return coursesService.getCourseById(course_id);
+    CourseDto getCourseById(@PathVariable("course_id") Integer course_id) {
+        return coursesService.getCourseDto(course_id);
     }
 
     @GetMapping("")
-    List<Course> getAllCourses() {
+    List<CourseDto> getAllCourses() {
         return coursesService.getAllCourses();
     }
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    Course postCourse(
+    CourseDto postCourse(
             @Valid @RequestBody CreateCourseDto createCourseDto
     ) {
         return coursesService.createCourse(createCourseDto);
     }
 
     @PutMapping("/{course_id}")
-    Course updateCourse(
+    CourseDto updateCourse(
             @PathVariable("course_id") Integer course_id,
             @Valid @RequestBody CreateCourseDto createCourseDto
     ) {
         return coursesService.updateCourse(course_id, createCourseDto);
+    }
+
+    @PutMapping("/{course_id}/students")
+    void addStudentToCourse(
+            @PathVariable("course_id") Integer course_id,
+            @RequestBody() String student_id
+    ) {
+        coursesService.addStudentToCourse(course_id, student_id);
     }
 
     @DeleteMapping("/{course_id}")

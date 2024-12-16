@@ -3,6 +3,7 @@ package AdvSe.LMS.users.entities;
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.utils.enums.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,9 +25,11 @@ public class Student extends User {
             joinColumns = @JoinColumn(name = "student_id"), // Foreign key in join table for Student
             inverseJoinColumns = @JoinColumn(name = "course_id") // Foreign key in join table for Course
     )
+    @JsonManagedReference
     private List<Course> courses = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Notification> notifications = new ArrayList<>();
 
     public Student(String id, String name, String password, Role role, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
@@ -36,12 +39,10 @@ public class Student extends User {
 
     public void addCourse(Course course) {
         courses.add(course);
-        course.addStudent(this);
     }
 
     public void removeCourse(Course course) {
         courses.remove(course);
-        course.removeStudent(this);
     }
 
     public void addNotification(Notification notification) {

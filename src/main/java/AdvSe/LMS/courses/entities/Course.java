@@ -6,6 +6,8 @@ import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,22 +37,28 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "Instructor_id", nullable = false)
+    @JsonBackReference
     private Instructor instructor;
 
+    @ManyToMany(mappedBy = "courses")
+    @JsonBackReference
+    private List<Student> students = new ArrayList<>();
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Lesson> lessons = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Question> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Quiz> quizzes = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Assignment> assignments = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "courses")
-    private List<Student> students = new ArrayList<>();
 
 
     public void addStudent(Student student) {
@@ -63,7 +71,6 @@ public class Course {
 
     public void addLesson(Lesson lesson) {
         lessons.add(lesson);
-        lesson.setCourse(this);
     }
 
     public void removeLesson(Lesson lesson) {
@@ -72,7 +79,6 @@ public class Course {
 
     public void addQuestion(Question question) {
         questions.add(question);
-        question.setCourse(this);
     }
 
     public void removeQuestion(Question question) {
@@ -81,7 +87,6 @@ public class Course {
 
     public void addQuiz(Quiz quiz) {
         quizzes.add(quiz);
-        quiz.setCourse(this);
     }
 
     public void removeQuiz(Quiz quiz) {
@@ -90,7 +95,6 @@ public class Course {
 
     public void addAssignment(Assignment assignment) {
         assignments.add(assignment);
-        assignment.setCourse(this);
     }
 
     public void removeAssignment(Assignment assignment) {
