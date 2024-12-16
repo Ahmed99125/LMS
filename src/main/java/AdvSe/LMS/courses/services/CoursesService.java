@@ -73,7 +73,7 @@ public class CoursesService {
 
     }
 
-    @PreAuthorize("hasAuthority('INSTRUCTOR')")
+    @PreAuthorize("hasAuthority('STUDENT')")
     public void addStudentToCourse(Integer courseId, String studentId) {
         Course course = getCourseById(courseId);
         Student student = studentsRepository.findById(studentId)

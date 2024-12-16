@@ -51,7 +51,6 @@ public class SecurityConfig {
             return auth;
         }
         return null;
-
     }
 
     @Bean
