@@ -6,11 +6,10 @@ import AdvSe.LMS.users.dtos.LoginDto;
 import AdvSe.LMS.users.entities.Admin;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
-import AdvSe.LMS.users.repositories.AdminsRepository;
-import AdvSe.LMS.users.repositories.InstructorsRepository;
-import AdvSe.LMS.users.repositories.StudentsRepository;
-import AdvSe.LMS.users.services.UserService;
-import AdvSe.LMS.utils.enums.Role;
+import AdvSe.LMS.users.entities.User;
+import AdvSe.LMS.users.services.AdminsService;
+import AdvSe.LMS.users.services.InstructorsService;
+import AdvSe.LMS.users.services.StudentsService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +20,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,59 +28,27 @@ import java.util.List;
 @RestController
 @RequestMapping("api/users")
 public class UsersController {
-    private final UserService userService;
-    private final StudentsRepository studentsRepository;
-    private final InstructorsRepository instructorsRepository;
-    private final AdminsRepository adminsRepository;
+    private final StudentsService studentsService;
+    private final InstructorsService instructorService;
+    private final AdminsService adminService;
     private final AuthenticationManager authenticationManager;
 
-    public UsersController(UserService userService,
-                           StudentsRepository studentsRepository,
-                           InstructorsRepository instructorsRepository,
-                           AdminsRepository adminsRepository,
-                           AuthenticationManager authenticationManager) {
-        this.userService = userService;
-        this.studentsRepository = studentsRepository;
-        this.instructorsRepository = instructorsRepository;
-        this.adminsRepository = adminsRepository;
+    public UsersController(StudentsService studentsService, InstructorsService instructorService, AdminsService adminService, AuthenticationManager authenticationManager) {
+        this.studentsService = studentsService;
+        this.instructorService = instructorService;
+        this.adminService = adminService;
         this.authenticationManager = authenticationManager;
     }
 
+
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CreateUserDto userDto) {
-        // Validate that all fields are filled
-        if (userDto.getName() == null || userDto.getName().isEmpty() ||
-                userDto.getPassword() == null || userDto.getPassword().isEmpty() ||
-                userDto.getId() == null || userDto.getId().isEmpty() ||
-                userDto.getRole() == null) {
-            return ResponseEntity.badRequest().body("All fields must be filled: Id, username, password, and role.");
-        }
-
-        if (adminsRepository.existsById(userDto.getId())) {
-            return ResponseEntity.badRequest().body("User with ID " + userDto.getId() + " already exists.");
-        }
-        if (instructorsRepository.existsById(userDto.getId())) {
-            return ResponseEntity.badRequest().body("User with ID " + userDto.getId() + " already exists.");
-        }
-        if (studentsRepository.existsById(userDto.getId())) {
-            return ResponseEntity.badRequest().body("User with ID " + userDto.getId() + " already exists.");
-        }
-
-        try {
-            Role role = userDto.getRole();
-            if (role == Role.ADMIN) {
-                userService.createAdmin(userDto);
-            } else if (role == Role.STUDENT) {
-                userService.createStudent(userDto);
-            } else if (role == Role.INSTRUCTOR) {
-                userService.createInstructor(userDto);
-            } else {
-                return ResponseEntity.badRequest().body("Role must be one of the following: STUDENT, INSTRUCTOR, ADMIN.");
-            }
-            return ResponseEntity.ok("User registered successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred during registration: " + e.getMessage());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public User register(@RequestBody CreateUserDto userDto) {
+        return switch (userDto.getRole()) {
+            case STUDENT -> studentsService.createStudent(userDto);
+            case INSTRUCTOR -> instructorService.createInstructor(userDto);
+            default -> adminService.createAdmin(userDto);
+        };
     }
 
 
@@ -90,9 +58,7 @@ public class UsersController {
             return ResponseEntity.badRequest().body("All fields must be filled: Username and password.");
         }
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword())
-            );
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 
             // If authentication is successful, return the authenticated user's details
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -109,27 +75,30 @@ public class UsersController {
     // Other routes (unchanged)
     @GetMapping("/students")
     public List<Student> getStudents() {
-        return studentsRepository.findAll();
+        return studentsService.getStudents();
     }
 
     @GetMapping("/instructors")
     public List<Instructor> getInstructors() {
-        return instructorsRepository.findAll();
+        return instructorService.getInstructors();
     }
 
     @GetMapping("/admins")
     public List<Admin> getAdmins() {
-        return adminsRepository.findAll();
+        return adminService.getAdmins();
     }
 
     @GetMapping("/user")
-    public ResponseEntity<String> getUser(HttpSession session) {
+    public User getUser(HttpSession session) {
         Authentication user = SecurityConfig.getLoggedInUser(session);
-        if (user != null) {
-            return ResponseEntity.ok("Logged-in user: " + user.getPrincipal());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user is currently logged in.");
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
         }
+        return switch (user.getAuthorities().iterator().next().getAuthority()) {
+            case "STUDENT" -> studentsService.getStudentById(user.getName());
+            case "INSTRUCTOR" -> instructorService.getInstructorById(user.getName());
+            default -> adminService.getAdminById(user.getName());
+        };
     }
 
     @PostMapping("/logout")
@@ -142,46 +111,41 @@ public class UsersController {
         return ResponseEntity.ok("Logout successful.");
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable String id, @RequestBody CreateUserDto userDto, HttpSession session) {
-        // Check if the logged-in user is an admin
-        Authentication user = SecurityConfig.getLoggedInUser(session);
-        if (user.getPrincipal().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't update Yourself.");
-        }
-
-        if (userDto.getName() == null || userDto.getName().isEmpty() ||
-                userDto.getPassword() == null || userDto.getPassword().isEmpty() ||
-                userDto.getId() == null || userDto.getId().isEmpty() ||
-                userDto.getRole() == null) {
-            return ResponseEntity.badRequest().body("All fields must be filled: Id, Name, password, and role.");
-        }
-
-        // Update user logic
-        try {
-            String res = userService.updateUser(id, userDto);
-            if (res.equals("not found")) return ResponseEntity.ok("User can't be found.");
-            else if (res.equals("Invalid data")) return ResponseEntity.ok("You entered Invalid data.");
-            return ResponseEntity.ok("User updated successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update user: " + e.getMessage());
-        }
+    @PutMapping("/students/{id}")
+    public Student updateStudent(@PathVariable String id, @RequestBody CreateUserDto userDto) {
+        return studentsService.updateStudent(id, userDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable String id, HttpSession session) {
+    @PutMapping("/instructors/{id}")
+    public Instructor updateInstructor(@PathVariable String id, @RequestBody CreateUserDto userDto) {
+        return instructorService.updateInstructor(id, userDto);
+    }
+
+    @PutMapping("/admins/{id}")
+    public Admin updateAdmin(@PathVariable String id, @RequestBody CreateUserDto userDto) {
+        return adminService.updateAdmin(id, userDto);
+    }
+
+    @DeleteMapping("/students/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteStudent(@PathVariable String id) {
+        studentsService.deleteStudent(id);
+    }
+
+    @DeleteMapping("/instructors/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteInstructor(@PathVariable String id) {
+        instructorService.deleteInstructor(id);
+    }
+
+    @DeleteMapping("/admins/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAdmin(@PathVariable String id, HttpSession session) {
         Authentication user = SecurityConfig.getLoggedInUser(session);
         if (user.getPrincipal().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't update Yourself.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete your own account.");
         }
-
-        try {
-            String res = userService.deleteUser(id);
-            if (res.equals("not found")) return ResponseEntity.ok("User can't be found.");
-            return ResponseEntity.ok("User deleted successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete user: " + e.getMessage());
-        }
+        adminService.deleteAdmin(id);
     }
 
 }

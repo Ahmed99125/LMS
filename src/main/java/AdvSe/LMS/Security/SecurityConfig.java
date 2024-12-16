@@ -1,8 +1,6 @@
 package AdvSe.LMS.Security;
 
-import AdvSe.LMS.users.entities.Admin;
-import AdvSe.LMS.users.entities.Instructor;
-import AdvSe.LMS.users.entities.Student;
+import AdvSe.LMS.users.entities.User;
 import AdvSe.LMS.users.repositories.AdminsRepository;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
 import AdvSe.LMS.users.repositories.StudentsRepository;
@@ -12,8 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -65,27 +65,19 @@ public class SecurityConfig {
 
                 PasswordEncoder encoder = new BCryptPasswordEncoder();
 
+                User user;
+
                 // Check Admins table
-                Admin admin = adminsRepository.findById(username).orElse(null);
-                if (admin != null && password.equals(admin.getPassword())) {
-                    List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority("ADMIN"));
-                    return new UsernamePasswordAuthenticationToken(username, password, authorities);
+                user = adminsRepository.findById(username).orElse(null);
+                if (user == null) {
+                    user = instructorsRepository.findById(username).orElse(null);
                 }
-
-                // Check Instructors table
-                Instructor instructor = instructorsRepository.findById(username).orElse(null);
-                if (instructor != null && password.equals(instructor.getPassword())) {
-                    List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority("INSTRUCTOR"));
-                    return new UsernamePasswordAuthenticationToken(username, password, authorities);
+                if (user == null) {
+                    user = studentsRepository.findById(username).orElse(null);
                 }
-
-                // Check Students table
-                Student student = studentsRepository.findById(username).orElse(null);
-                if (student != null && password.equals(student.getPassword())) {
+                if (user != null && encoder.matches(password, user.getPassword())) {
                     List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority("STUDENT"));
+                    authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
                     return new UsernamePasswordAuthenticationToken(username, password, authorities);
                 }
 
@@ -111,17 +103,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login").permitAll() // Allow login only if unauthenticated
                         .requestMatchers("/api/users/user", "/api/users/logout").authenticated() // Require authentication for /user and /logout
                         .requestMatchers("/api/users/students", "/api/users/instructors", "/api/users/admins", "/api/users/register", "/api/users/{id}/**").hasAuthority("ADMIN") // Only admins can access these routes
                         .anyRequest().authenticated() // All other requests require authentication
                 )
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Allow sessions to be created
-                .and()
-                .httpBasic(); // Use HTTP Basic Authentication
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .httpBasic(Customizer.withDefaults()); // Use HTTP Basic Authentication
         return http.build();
     }
 }

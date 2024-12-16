@@ -27,8 +27,10 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Column(unique = true)
     private String email;
 
+    @Column(unique = true)
     private String phone;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
