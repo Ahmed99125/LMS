@@ -22,12 +22,10 @@ public class QuizzesService {
 
     private final QuizzesRepository quizzesRepository;
     private final CoursesRepository courseRepository;
-    private final QuestionsService questionsService;
 
-    public QuizzesService(QuizzesRepository quizzesRepository, CoursesRepository courseRepository, QuestionsService questionsService) {
+    public QuizzesService(QuizzesRepository quizzesRepository, CoursesRepository courseRepository) {
         this.quizzesRepository = quizzesRepository;
         this.courseRepository = courseRepository;
-        this.questionsService = questionsService;
     }
 
     public List<Quiz> getQuestionsByCourseId(Integer course_id) {

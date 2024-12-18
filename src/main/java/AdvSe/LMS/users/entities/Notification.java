@@ -25,17 +25,7 @@ public class Notification {
     private String message;
 
     @ManyToOne
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "user_id")
     @JsonBackReference
-    private Student student;
-
-    @ManyToOne
-    @JoinColumn(name = "instructor_id")
-    @JsonBackReference
-    private Instructor instructor;
-
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    @JsonBackReference
-    private Admin admin;
+    private User user;
 }
