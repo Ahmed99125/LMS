@@ -34,7 +34,7 @@ public class AssignmentsService {
         Assignment assignment = assignmentsRepository.findById(assignment_id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Assignment not found"));
 
-        if (assignment.getCourse().getId().equals(course_id))
+        if (!assignment.getCourse().getId().equals(course_id))
             throw new ResponseStatusException(NOT_FOUND, "Assignment not found");
 
         return assignment;

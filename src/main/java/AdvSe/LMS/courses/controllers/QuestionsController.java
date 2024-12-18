@@ -5,12 +5,15 @@ import AdvSe.LMS.courses.dtos.UpdateQuestionDto;
 import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.repositories.QuestionsRepository;
 import AdvSe.LMS.courses.services.QuestionsService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/courses/{course_id}/questions")
 public class QuestionsController {
@@ -39,7 +42,7 @@ public class QuestionsController {
     @ResponseStatus(HttpStatus.CREATED)
     Question postQuestion(
             @PathVariable("course_id") Integer course_id,
-            @RequestBody CreateQuestionDto createQuestionDto
+            @Valid @RequestBody CreateQuestionDto createQuestionDto
     ) {
         return questionsService.createQuestion(course_id, createQuestionDto);
     }
@@ -49,7 +52,7 @@ public class QuestionsController {
     Question updateQuestion(
             @PathVariable("course_id") Integer course_id,
             @PathVariable("question_id") Integer question_id,
-            @RequestBody UpdateQuestionDto updateQuestionDto) {
+            @Valid @RequestBody UpdateQuestionDto updateQuestionDto) {
         return questionsService.updateQuestion(course_id, question_id, updateQuestionDto);
     }
 
@@ -59,6 +62,7 @@ public class QuestionsController {
     void deleteQuestion(
             @PathVariable("course_id") Integer course_id,
             @PathVariable("question_id") Integer question_id) {
+        log.info("Deleting question with id {} from course {}", question_id, course_id);
         Question question = questionsService.getQuestionById(course_id, question_id);
         questionsRepository.delete(question);
     }

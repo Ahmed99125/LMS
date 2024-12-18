@@ -31,7 +31,7 @@ public class QuestionsService {
         Question question = questionsRepository.findById(question_id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Question not found"));
 
-        if (question.getCourse().getId().equals(course_id))
+        if (!question.getCourse().getId().equals(course_id))
             throw new ResponseStatusException(NOT_FOUND, "Question not found");
 
         return question;
