@@ -1,9 +1,6 @@
 package AdvSe.LMS.cloudinary;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EntityListeners(CloudinaryListener.class)
 @Table(name = "cloudinary_files")
 public class CloudinaryFile {
     @Id

@@ -2,13 +2,10 @@ package AdvSe.LMS.users.services;
 
 import AdvSe.LMS.users.dtos.CreateUserDto;
 import AdvSe.LMS.users.dtos.UpdateProfileDto;
-import AdvSe.LMS.users.entities.Admin;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -53,17 +50,21 @@ public class InstructorsService {
             throw new ResponseStatusException(NOT_FOUND, "Instructor not found");
         instructorsRepository.deleteById(instructorId);
     }
-    
+
     public Instructor updateProfile(String id, UpdateProfileDto profileDto) {
-        Instructor user = instructorsRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Admin not found"));
-        
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        user.setEmail(profileDto.getEmail());
-        user.setPassword(passwordEncoder.encode(profileDto.getPassword()));
-        user.setPhone(profileDto.getPhone());
-        user.setProfilePicture(profileDto.getProfilePicture());
+        Instructor user = instructorsRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
+
+        usersService.updateProfile(user, profileDto);
 
         return instructorsRepository.save(user);
     }
-    
+
+    public Instructor updatePicture(String id, MultipartFile profilePicture) {
+        Instructor user = instructorsRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
+
+        usersService.updatePicture(user, profilePicture);
+
+        return instructorsRepository.save(user);
+    }
+
 }

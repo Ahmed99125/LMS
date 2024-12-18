@@ -63,4 +63,8 @@ public class Lesson {
     public void removeLessonFile(CloudinaryFile lessonFile) {
         lessonFiles.remove(lessonFile);
     }
+
+    public void removeAllLessonFiles() {
+        lessonFiles.clear();
+    }
 }

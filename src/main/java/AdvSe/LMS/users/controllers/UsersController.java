@@ -4,7 +4,6 @@ import AdvSe.LMS.Security.SecurityConfig;
 import AdvSe.LMS.users.dtos.CreateUserDto;
 import AdvSe.LMS.users.dtos.LoginDto;
 import AdvSe.LMS.users.dtos.UpdateProfileDto;
-import AdvSe.LMS.users.dtos.UserDetailsDto;
 import AdvSe.LMS.users.entities.Admin;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
@@ -15,6 +14,7 @@ import AdvSe.LMS.users.services.StudentsService;
 import AdvSe.LMS.utils.enums.Role;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,15 +24,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import AdvSe.LMS.cloudinary.CloudinaryService;
 import org.springframework.web.multipart.MultipartFile;
-import AdvSe.LMS.cloudinary.CloudinaryFile;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 
 
+@Slf4j
 @RestController
 @RequestMapping("api/users")
 public class UsersController {
@@ -40,15 +38,13 @@ public class UsersController {
     private final InstructorsService instructorsService;
     private final AdminsService adminsService;
     private final AuthenticationManager authenticationManager;
-    private final CloudinaryService cloudinaryService;
 
-    public UsersController(StudentsService studentsService, InstructorsService instructorService, AdminsService adminService, 
-            AuthenticationManager authenticationManager, CloudinaryService cloudinaryService) {
-		this.studentsService = studentsService;
-		this.instructorsService = instructorService;
-		this.adminsService = adminService;
-		this.authenticationManager = authenticationManager;
-		this.cloudinaryService = cloudinaryService; // Inject CloudinaryService
+    public UsersController(StudentsService studentsService, InstructorsService instructorService, AdminsService adminService,
+                           AuthenticationManager authenticationManager) {
+        this.studentsService = studentsService;
+        this.instructorsService = instructorService;
+        this.adminsService = adminService;
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/register")
@@ -73,7 +69,6 @@ public class UsersController {
             // If authentication is successful, return the authenticated user's details
             SecurityContextHolder.getContext().setAuthentication(authentication);
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-            String role = authentication.getAuthorities().iterator().next().getAuthority(); // Get the role
             return ResponseEntity.ok("Login successful for user: " + authentication.getName());
         } catch (AuthenticationException e) {
             // Handle authentication failure
@@ -96,47 +91,19 @@ public class UsersController {
         return adminsService.getAdmins();
     }
 
-    @GetMapping("/user")
+    @GetMapping("/profile")
     public User getUser(HttpSession session) {
         Authentication user = SecurityConfig.getLoggedInUser(session);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
         }
-        return switch (user.getAuthorities().iterator().next().getAuthority()) {
-            case "STUDENT" -> studentsService.getStudentById(user.getName());
-            case "INSTRUCTOR" -> instructorsService.getInstructorById(user.getName());
+        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
+
+        return switch (role) {
+            case STUDENT -> studentsService.getStudentById(user.getName());
+            case INSTRUCTOR -> instructorsService.getInstructorById(user.getName());
             default -> adminsService.getAdminById(user.getName());
         };
-    }
-    
-    @GetMapping("/mydetails")
-    public ResponseEntity<UserDetailsDto> getMyDetails() {
-        // Get the currently authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName(); // Assuming the username is the user ID
-        String role = authentication.getAuthorities().iterator().next().getAuthority(); // Get the user's role
-
-        UserDetailsDto userDetails;
-
-        // Retrieve user details based on the role
-        switch (role) {
-            case "STUDENT":
-                Student student = studentsService.getStudentById(userId);
-                userDetails = new UserDetailsDto(student.getId(), student.getName(), student.getEmail(), student.getPhone(), "STUDENT", student.getProfilePicture());
-                break;
-            case "INSTRUCTOR":
-                Instructor instructor = instructorsService.getInstructorById(userId);
-                userDetails = new UserDetailsDto(instructor.getId(), instructor.getName(), instructor.getEmail(), instructor.getPhone(), "INSTRUCTOR", instructor.getProfilePicture());
-                break;
-            case "ADMIN":
-                Admin admin = adminsService.getAdminById(userId);
-                userDetails = new UserDetailsDto(admin.getId(), admin.getName(), admin.getEmail(), admin.getPhone(), "ADMIN", admin.getProfilePicture());
-                break;
-            default:
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Handle case if the role is unexpected
-        }
-
-        return ResponseEntity.ok(userDetails);
     }
 
     @PostMapping("/logout")
@@ -149,44 +116,39 @@ public class UsersController {
         return ResponseEntity.ok("Logout successful.");
     }
 
-    @PostMapping("/myprofile/update")
-    public ResponseEntity<String> updateMyProfile(
-            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
-            @RequestParam(value = "email", required = false) String email,
-            @RequestParam(value = "password", required = false) String password,
-            @RequestParam(value = "phone", required = false) String phone,
-            HttpSession session) {
-
-        UpdateProfileDto profileDto = new UpdateProfileDto(email, password, phone, null); // Initialize with other fields
-
-        // Process the profile picture if it exists
-        if (profilePicture != null && !profilePicture.isEmpty()) {
-            try {
-            	CloudinaryFile uploaded = cloudinaryService.uploadFile(profilePicture, "profilePictures");
-                profileDto.setProfilePicture(uploaded); 
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload profile picture.");
-            }
+    @PutMapping("/profile/update_profile")
+    public User updateProfile(@RequestBody UpdateProfileDto profileDto, HttpSession session) {
+        Authentication user = SecurityConfig.getLoggedInUser(session);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
         }
-
-        // Call the relevant service to update the profile
-        Authentication user = (Authentication) session.getAttribute("SPRING_SECURITY_CONTEXT");
         String userId = user.getName();
-        String role = user.getAuthorities().iterator().next().getAuthority();
-        Role userRole = Role.valueOf(role);
+        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
 
-        switch (userRole) {
+        return switch (role) {
             case STUDENT -> studentsService.updateProfile(userId, profileDto);
             case INSTRUCTOR -> instructorsService.updateProfile(userId, profileDto);
-            case ADMIN -> adminsService.updateProfile(userId, profileDto);
-            default -> {
-                return ResponseEntity.badRequest().body("Invalid user role.");
-            }
-        }
-
-        return ResponseEntity.ok("User was updated successfully.");
+            default -> adminsService.updateProfile(userId, profileDto);
+        };
     }
-    
+
+    @PutMapping("/profile/update_picture")
+    public User updatePicture(@RequestParam("profilePicture") MultipartFile profilePicture, HttpSession session) {
+        Authentication user = SecurityConfig.getLoggedInUser(session);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
+        }
+        String userId = user.getName();
+
+        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
+
+        return switch (role) {
+            case STUDENT -> studentsService.updatePicture(userId, profilePicture);
+            case INSTRUCTOR -> instructorsService.updatePicture(userId, profilePicture);
+            default -> adminsService.updatePicture(userId, profilePicture);
+        };
+    }
+
     @PutMapping("/students/{id}")
     public Student updateStudent(@PathVariable String id, @Valid @RequestBody CreateUserDto userDto) {
         return studentsService.updateStudent(id, userDto);
@@ -223,6 +185,4 @@ public class UsersController {
         }
         adminsService.deleteAdmin(id);
     }
-    
-
 }

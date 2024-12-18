@@ -10,10 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -29,8 +27,9 @@ public class AssignmentsService {
     }
 
     public Assignment getAssignmentById(Integer course_id, Integer assignment_id) {
-        Course course = courseRepository.findById(course_id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+        if (!courseRepository.existsById(course_id)) {
+            throw new ResponseStatusException(NOT_FOUND, "Course not found");
+        }
 
         Assignment assignment = assignmentsRepository.findById(assignment_id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Assignment not found"));
@@ -55,12 +54,9 @@ public class AssignmentsService {
         Assignment assignment = new Assignment();
         assignment.setCourse(course);
         assignment.setName(name);
-        try {
-            List<CloudinaryFile> cloudinaryFiles = cloudinaryService.uploadMultipleFiles(files, "assignments");
-            assignment.setAssignmentFiles(cloudinaryFiles);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(BAD_REQUEST, "Can't read files");
+        for (MultipartFile file : files) {
+            CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "assignments");
+            assignment.addAssignmentFile(cloudinaryFile);
         }
 
         return assignmentsRepository.save(assignment);
@@ -70,13 +66,11 @@ public class AssignmentsService {
         Assignment assignment = getAssignmentById(course_id, assignment_id);
 
         assignment.setName(name);
-        try {
-            List<CloudinaryFile> cloudinaryFiles = cloudinaryService.uploadMultipleFiles(files, "assignments");
-            assignment.setAssignmentFiles(cloudinaryFiles);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(BAD_REQUEST, "Can't read files");
+        for (MultipartFile file : files) {
+            CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "assignments");
+            assignment.addAssignmentFile(cloudinaryFile);
         }
+
         return assignmentsRepository.save(assignment);
     }
 }

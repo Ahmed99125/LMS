@@ -7,11 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/api/courses/{course_id}/assignments")
@@ -26,10 +23,7 @@ public class AssignmentsController {
 
     @GetMapping("")
     List<Assignment> getAssignments(@PathVariable("course_id") Integer course_id) {
-        List<Assignment> result = assignmentsService.getAssignmentsByCourseId(course_id);
-        if (result == null)
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        return result;
+        return assignmentsService.getAssignmentsByCourseId(course_id);
     }
 
     @GetMapping("/{assignment_id}")
