@@ -2,18 +2,19 @@ package AdvSe.LMS.courses.services;
 
 import AdvSe.LMS.courses.dtos.CourseDto;
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
+import AdvSe.LMS.courses.dtos.UpdateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
 import AdvSe.LMS.users.repositories.InstructorsRepository;
 import AdvSe.LMS.users.repositories.StudentsRepository;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -42,7 +43,6 @@ public class CoursesService {
         return CourseDto.fromList(courseRepository.findAll());
     }
 
-    @PreAuthorize("hasAuthority('INSTRUCTOR')")
     public CourseDto createCourse(CreateCourseDto createCourseDto) {
         Instructor instructor = instructorsRepository.findById(createCourseDto.getInstructorId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
@@ -54,26 +54,21 @@ public class CoursesService {
         return new CourseDto(courseRepository.save(course));
     }
 
-    @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    public CourseDto updateCourse(Integer course_id, CreateCourseDto createCourseDto) {
+    public CourseDto updateCourse(Integer course_id, UpdateCourseDto updateCourseDto, String instructorId) {
         Course course = getCourseById(course_id);
+        if (!course.getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
-        if (createCourseDto.getName() != null)
-            course.setName(createCourseDto.getName());
-        if (createCourseDto.getDescription() != null)
-            course.setDescription(createCourseDto.getDescription());
-        if (createCourseDto.getCourseCode() != null)
-            course.setCourseCode(createCourseDto.getCourseCode());
-        if (createCourseDto.getInstructorId() != null) {
-            Instructor instructor = instructorsRepository.findById(createCourseDto.getInstructorId())
-                    .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
-            course.setInstructor(instructor);
-        }
+        if (updateCourseDto.getName() != null)
+            course.setName(updateCourseDto.getName());
+        if (updateCourseDto.getDescription() != null)
+            course.setDescription(updateCourseDto.getDescription());
+        if (updateCourseDto.getCourseCode() != null)
+            course.setCourseCode(updateCourseDto.getCourseCode());
         return new CourseDto(courseRepository.save(course));
 
     }
 
-    @PreAuthorize("hasAuthority('STUDENT')")
     public void addStudentToCourse(Integer courseId, String studentId) {
         Course course = getCourseById(courseId);
         Student student = studentsRepository.findById(studentId)
@@ -82,5 +77,12 @@ public class CoursesService {
         student.addCourse(course);
         courseRepository.save(course);
         studentsRepository.save(student);
+    }
+
+    public void deleteCourse(Integer course_id, String instructorId) {
+        Course course = getCourseById(course_id);
+        if (!course.getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+        courseRepository.delete(course);
     }
 }

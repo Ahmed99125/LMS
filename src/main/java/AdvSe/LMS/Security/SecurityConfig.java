@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login").permitAll() // Allow login only if unauthenticated
-                        .requestMatchers("/api/users/students/**", "/api/users/instructors/**", "/api/users/admins/**", "/api/users/register").hasAuthority("ADMIN") // Only admins can access these routes
+                        .requestMatchers("/api/users/students/**", "/api/users/instructors/**", "/api/users/admins/**", "/api/users").hasAuthority("ADMIN") // Only admins can access these routes
                         .anyRequest().authenticated() // All other requests require authentication
                 )
                 .logout(logout -> logout.logoutUrl("/api/auth/logout"))

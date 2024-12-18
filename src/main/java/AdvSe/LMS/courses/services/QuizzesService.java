@@ -46,9 +46,13 @@ public class QuizzesService {
         return quiz;
     }
 
-    public Quiz createQuiz(Integer courseId, QuizDto quizDto) {
+    public Quiz createQuiz(Integer courseId, QuizDto quizDto, String instructorId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+
+        if (!course.getInstructor().getId().equals(instructorId)) {
+            throw new ResponseStatusException(BAD_REQUEST, "This course does not belong to you");
+        }
 
         Set<Integer> questionIds = quizDto.getQuestionIds();
         List<Question> questions = course.getQuestions().stream().filter(question -> questionIds.contains(question.getId())).toList();
@@ -64,9 +68,13 @@ public class QuizzesService {
         return quizzesRepository.save(quiz);
     }
 
-    public Quiz generateQuiz(Integer courseId, GenerateQuizDto generateQuizDto) {
+    public Quiz generateQuiz(Integer courseId, GenerateQuizDto generateQuizDto, String instructorId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+
+        if (!course.getInstructor().getId().equals(instructorId)) {
+            throw new ResponseStatusException(BAD_REQUEST, "This course does not belong to you");
+        }
 
         List<Question> questions = course.getQuestions();
         if (generateQuizDto.getNumberOfQuestions() > questions.size()) {
@@ -81,5 +89,13 @@ public class QuizzesService {
             quiz.addQuestion(question);
         }
         return quizzesRepository.save(quiz);
+    }
+
+    public void deleteQuiz(Integer courseId, Integer quizId, String instructorId) {
+        Quiz quiz = getQuizById(courseId, quizId);
+        if (!quiz.getCourse().getInstructor().getId().equals(instructorId)) {
+            throw new ResponseStatusException(BAD_REQUEST, "This quiz does not belong to you");
+        }
+        quizzesRepository.delete(quiz);
     }
 }

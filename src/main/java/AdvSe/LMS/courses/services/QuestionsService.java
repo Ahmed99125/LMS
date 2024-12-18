@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -23,7 +24,7 @@ public class QuestionsService {
         this.courseRepository = courseRepository;
     }
 
-    public Question getQuestionById(Integer course_id, Integer question_id) {
+    public Question getQuestionById(Integer course_id, Integer question_id, String instructorId) {
         if (!courseRepository.existsById(course_id)) {
             throw new ResponseStatusException(NOT_FOUND, "Course not found");
         }
@@ -34,19 +35,28 @@ public class QuestionsService {
         if (!question.getCourse().getId().equals(course_id))
             throw new ResponseStatusException(NOT_FOUND, "Question not found");
 
+        if (!question.getCourse().getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+
         return question;
     }
 
-    public List<Question> getQuestionsByCourseId(Integer course_id) {
+    public List<Question> getQuestionsByCourseId(Integer course_id, String instructorId) {
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+
+        if (!course.getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
         return course.getQuestions();
     }
 
-    public Question createQuestion(Integer course_id, CreateQuestionDto createQuestionDto) {
+    public Question createQuestion(Integer course_id, CreateQuestionDto createQuestionDto, String instructorId) {
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+
+        if (!course.getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
         Question question = new Question();
         question.setCourse(course);
@@ -57,8 +67,8 @@ public class QuestionsService {
         return questionsRepository.save(question);
     }
 
-    public Question updateQuestion(Integer course_id, Integer Question_id, UpdateQuestionDto updateQuestionDto) {
-        Question question = getQuestionById(course_id, Question_id);
+    public Question updateQuestion(Integer course_id, Integer Question_id, UpdateQuestionDto updateQuestionDto, String instructorId) {
+        Question question = getQuestionById(course_id, Question_id, instructorId);
 
         if (updateQuestionDto.getType() != null)
             question.setType(updateQuestionDto.getType());
@@ -67,5 +77,10 @@ public class QuestionsService {
         if (updateQuestionDto.getAnswer() != null)
             question.setAnswer(updateQuestionDto.getAnswer());
         return questionsRepository.save(question);
+    }
+
+    public void deleteQuestion(Integer course_id, Integer question_id, String instructorId) {
+        Question question = getQuestionById(course_id, question_id, instructorId);
+        questionsRepository.delete(question);
     }
 }

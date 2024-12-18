@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 
@@ -24,6 +26,10 @@ public class UsersService {
     public UsersService(UsersRepository usersRepository, CloudinaryService cloudinaryService) {
         this.usersRepository = usersRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    public List<User> getUsers() {
+        return usersRepository.findAll();
     }
 
     public void setUserData(User user, CreateUserDto userDto) {
@@ -61,10 +67,7 @@ public class UsersService {
         user.setProfilePicture(cloudinaryFile);
     }
 
-    public User getLoggedInUser(org.springframework.security.core.userdetails.User user) {
-        if (user == null) {
-            throw new ResponseStatusException(UNAUTHORIZED, "No user is currently logged in.");
-        }
-        return usersRepository.findById(user.getUsername()).orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+    public User getLoggedInUser(String userId) {
+        return usersRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
     }
 }

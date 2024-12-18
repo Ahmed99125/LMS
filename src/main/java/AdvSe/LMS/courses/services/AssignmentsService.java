@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -24,6 +25,13 @@ public class AssignmentsService {
         this.assignmentsRepository = assignmentsRepository;
         this.courseRepository = courseRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    private Assignment getCheckedAssignmentById(Integer course_id, Integer assignment_id, String instructorId) {
+        Assignment assignment = getAssignmentById(course_id, assignment_id);
+        if (!assignment.getCourse().getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+        return assignment;
     }
 
     public Assignment getAssignmentById(Integer course_id, Integer assignment_id) {
@@ -47,9 +55,11 @@ public class AssignmentsService {
         return course.getAssignments();
     }
 
-    public Assignment createAssignment(Integer course_id, String name, List<MultipartFile> files) {
+    public Assignment createAssignment(Integer course_id, String instructorId, String name, List<MultipartFile> files) {
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+        if (!course.getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
         Assignment assignment = new Assignment();
         assignment.setCourse(course);
@@ -62,8 +72,8 @@ public class AssignmentsService {
         return assignmentsRepository.save(assignment);
     }
 
-    public Assignment updateAssignment(Integer course_id, Integer assignment_id, String name, List<MultipartFile> files) {
-        Assignment assignment = getAssignmentById(course_id, assignment_id);
+    public Assignment updateAssignment(Integer course_id, String instructorId, Integer assignment_id, String name, List<MultipartFile> files) {
+        Assignment assignment = getCheckedAssignmentById(course_id, assignment_id, instructorId);
 
         assignment.setName(name);
         for (MultipartFile file : files) {
@@ -72,5 +82,10 @@ public class AssignmentsService {
         }
 
         return assignmentsRepository.save(assignment);
+    }
+
+    public void deleteAssignment(Integer course_id, String instructorId, Integer assignment_id) {
+        Assignment assignment = getCheckedAssignmentById(course_id, assignment_id, instructorId);
+        assignmentsRepository.delete(assignment);
     }
 }

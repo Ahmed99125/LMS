@@ -1,10 +1,10 @@
 package AdvSe.LMS.courses.controllers;
 
 import AdvSe.LMS.courses.entities.Questions.Assignment;
-import AdvSe.LMS.courses.repositories.AssignmentsRepository;
 import AdvSe.LMS.courses.services.AssignmentsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,11 +14,9 @@ import java.util.List;
 @RequestMapping("/api/courses/{course_id}/assignments")
 public class AssignmentsController {
     private final AssignmentsService assignmentsService;
-    private final AssignmentsRepository assignmentsRepository;
 
-    AssignmentsController(AssignmentsService assignmentsService, AssignmentsRepository assignmentsRepository) {
+    AssignmentsController(AssignmentsService assignmentsService) {
         this.assignmentsService = assignmentsService;
-        this.assignmentsRepository = assignmentsRepository;
     }
 
     @GetMapping("")
@@ -39,8 +37,10 @@ public class AssignmentsController {
     Assignment postAssignment(
             @PathVariable("course_id") Integer course_id,
             @RequestPart("data") String name,
-            @RequestPart("files") List<MultipartFile> files) {
-        return assignmentsService.createAssignment(course_id, name, files);
+            @RequestPart("files") List<MultipartFile> files,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+    ) {
+        return assignmentsService.createAssignment(course_id, user.getUsername(), name, files);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
@@ -49,8 +49,10 @@ public class AssignmentsController {
             @PathVariable("course_id") Integer course_id,
             @PathVariable("assignment_id") Integer assignment_id,
             @RequestPart("data") String name,
-            @RequestPart("files") List<MultipartFile> files) {
-        return assignmentsService.updateAssignment(course_id, assignment_id, name, files);
+            @RequestPart("files") List<MultipartFile> files,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+    ) {
+        return assignmentsService.updateAssignment(course_id, user.getUsername(), assignment_id, name, files);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
@@ -58,8 +60,9 @@ public class AssignmentsController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteAssignment(
             @PathVariable("course_id") Integer course_id,
-            @PathVariable("assignment_id") Integer assignment_id) {
-        Assignment assignment = assignmentsService.getAssignmentById(course_id, assignment_id);
-        assignmentsRepository.delete(assignment);
+            @PathVariable("assignment_id") Integer assignment_id,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+    ) {
+        assignmentsService.deleteAssignment(course_id, user.getUsername(), assignment_id);
     }
 }

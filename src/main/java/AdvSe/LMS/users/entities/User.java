@@ -69,6 +69,7 @@ public class User {
         notifications.remove(notification);
     }
 
+    @JsonIgnore
     public String getRole() {
         return this.getClass().getAnnotation(DiscriminatorValue.class).value();
     }

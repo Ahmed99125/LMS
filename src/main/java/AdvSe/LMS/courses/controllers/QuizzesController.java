@@ -3,11 +3,11 @@ package AdvSe.LMS.courses.controllers;
 import AdvSe.LMS.courses.dtos.GenerateQuizDto;
 import AdvSe.LMS.courses.dtos.QuizDto;
 import AdvSe.LMS.courses.entities.Questions.Quiz;
-import AdvSe.LMS.courses.repositories.QuizzesRepository;
 import AdvSe.LMS.courses.services.QuizzesService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,11 +16,9 @@ import java.util.List;
 @RequestMapping("/api/courses/{course_id}/quizzes")
 public class QuizzesController {
     private final QuizzesService quizzesService;
-    private final QuizzesRepository quizzesRepository;
 
-    public QuizzesController(QuizzesService quizzesService, QuizzesRepository quizzesRepository) {
+    public QuizzesController(QuizzesService quizzesService) {
         this.quizzesService = quizzesService;
-        this.quizzesRepository = quizzesRepository;
     }
 
     @GetMapping("")
@@ -40,9 +38,10 @@ public class QuizzesController {
     @ResponseStatus(HttpStatus.CREATED)
     Quiz postQuiz(
             @PathVariable("course_id") Integer course_id,
-            @Valid @RequestBody QuizDto quizDto
+            @Valid @RequestBody QuizDto quizDto,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return quizzesService.createQuiz(course_id, quizDto);
+        return quizzesService.createQuiz(course_id, quizDto, user.getUsername());
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
@@ -50,9 +49,10 @@ public class QuizzesController {
     @ResponseStatus(HttpStatus.CREATED)
     Quiz generateQuiz(
             @PathVariable("course_id") Integer course_id,
-            @Valid @RequestBody GenerateQuizDto generateQuizDto
+            @Valid @RequestBody GenerateQuizDto generateQuizDto,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return quizzesService.generateQuiz(course_id, generateQuizDto);
+        return quizzesService.generateQuiz(course_id, generateQuizDto, user.getUsername());
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
@@ -60,8 +60,9 @@ public class QuizzesController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteQuestion(
             @PathVariable("course_id") Integer course_id,
-            @PathVariable("quiz_id") Integer quiz_id) {
-        Quiz quiz = quizzesService.getQuizById(course_id, quiz_id);
-        quizzesRepository.delete(quiz);
+            @PathVariable("quiz_id") Integer quiz_id,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+    ) {
+        quizzesService.deleteQuiz(course_id, quiz_id, user.getUsername());
     }
 }

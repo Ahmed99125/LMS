@@ -38,7 +38,41 @@ public class UsersController {
         this.adminsService = adminService;
     }
 
-    @PostMapping("/register")
+    @GetMapping("/profile")
+    public User getLoggedInUser(@AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
+        return usersService.getLoggedInUser(user.getUsername());
+    }
+
+    @PutMapping("/profile/update_profile")
+    public User updateProfile(@RequestBody UpdateProfileDto profileDto, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
+        String userId = user.getUsername();
+        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
+
+        return switch (role) {
+            case STUDENT -> studentsService.updateProfile(userId, profileDto);
+            case INSTRUCTOR -> instructorsService.updateProfile(userId, profileDto);
+            default -> adminsService.updateProfile(userId, profileDto);
+        };
+    }
+
+    @PutMapping("/profile/update_picture")
+    public User updatePicture(@RequestParam("profilePicture") MultipartFile profilePicture, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
+        String userId = user.getUsername();
+        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
+
+        return switch (role) {
+            case STUDENT -> studentsService.updatePicture(userId, profilePicture);
+            case INSTRUCTOR -> instructorsService.updatePicture(userId, profilePicture);
+            default -> adminsService.updatePicture(userId, profilePicture);
+        };
+    }
+
+    @GetMapping("")
+    public List<User> getUsers() {
+        return usersService.getUsers();
+    }
+
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public User register(@Valid @RequestBody CreateUserDto userDto) {
         return switch (userDto.getRole()) {
@@ -61,43 +95,6 @@ public class UsersController {
     @GetMapping("/admins")
     public List<Admin> getAdmins() {
         return adminsService.getAdmins();
-    }
-
-    @GetMapping("/profile")
-    public User getLoggedInUser(@AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
-        return usersService.getLoggedInUser(user);
-    }
-
-    @PutMapping("/profile/update_profile")
-    public User updateProfile(@RequestBody UpdateProfileDto profileDto, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
-        }
-
-        String userId = user.getUsername();
-        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
-
-        return switch (role) {
-            case STUDENT -> studentsService.updateProfile(userId, profileDto);
-            case INSTRUCTOR -> instructorsService.updateProfile(userId, profileDto);
-            default -> adminsService.updateProfile(userId, profileDto);
-        };
-    }
-
-    @PutMapping("/profile/update_picture")
-    public User updatePicture(@RequestParam("profilePicture") MultipartFile profilePicture, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
-        }
-        String userId = user.getUsername();
-
-        Role role = Role.valueOf(user.getAuthorities().iterator().next().getAuthority());
-
-        return switch (role) {
-            case STUDENT -> studentsService.updatePicture(userId, profilePicture);
-            case INSTRUCTOR -> instructorsService.updatePicture(userId, profilePicture);
-            default -> adminsService.updatePicture(userId, profilePicture);
-        };
     }
 
     @PutMapping("/students/{id}")
@@ -130,9 +127,6 @@ public class UsersController {
     @DeleteMapping("/admins/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAdmin(@PathVariable String id, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No user is currently logged in.");
-        }
         if (id.equals(user.getUsername())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete yourself.");
         }
