@@ -2,7 +2,10 @@ package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
+import AdvSe.LMS.courses.entities.Questions.Submissions.AssignmentSubmission;
+import AdvSe.LMS.courses.entities.Questions.Submissions.QuizSubmission;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +41,10 @@ public class Assignment {
             inverseJoinColumns = @JoinColumn(name = "file_id")
     )
     private List<CloudinaryFile> assignmentFiles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<AssignmentSubmission> submissions = new ArrayList<>();
 
     public void addAssignmentFile(CloudinaryFile assignmentFile) {
         assignmentFiles.add(assignmentFile);

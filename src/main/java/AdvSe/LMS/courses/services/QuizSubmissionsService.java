@@ -90,10 +90,6 @@ public class QuizSubmissionsService {
         Course course = courseRepository.findById(quizSubmissionDto.getCourseId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
-        if (!course.getId().equals(quizSubmissionDto.getCourseId())) {
-            throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
-        }
-
         Student student = course.getStudents().stream().filter(s -> s.getId().equals(quizSubmissionDto.getStudentId())).findFirst()
                 .orElseThrow(() -> new ResponseStatusException(FORBIDDEN, "You are not enrolled in this course"));
 

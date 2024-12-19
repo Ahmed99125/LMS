@@ -20,6 +20,7 @@ public class QuizSubmissionsController {
         this.quizSubmissionsService = quizSubmissionsService;
     }
 
+    // This method is used to get all the submissions for a particular quiz
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @GetMapping("")
     public List<QuizSubmission> getQuizSubmissions(
@@ -30,6 +31,7 @@ public class QuizSubmissionsController {
         return quizSubmissionsService.getQuizSubmissions(course_id, quiz_id, user.getUsername());
     }
 
+    // This method is used to get the submission of a particular student for a particular quiz
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @GetMapping("/{student_id}")
     public QuizSubmission getQuizSubmission(
@@ -41,6 +43,7 @@ public class QuizSubmissionsController {
         return quizSubmissionsService.getQuizSubmission(course_id, quiz_id, student_id, user.getUsername());
     }
 
+    // This method is used to get the submission of the current student for a particular quiz
     @PreAuthorize("hasAuthority('STUDENT')")
     @GetMapping("/my_submission")
     public QuizSubmission getMyQuizSubmission(
@@ -51,6 +54,7 @@ public class QuizSubmissionsController {
         return quizSubmissionsService.getMyQuizSubmission(course_id, quiz_id, user.getUsername());
     }
 
+    // This method is used to submit a quiz
     @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping("")
     public QuizSubmission submitQuiz(
