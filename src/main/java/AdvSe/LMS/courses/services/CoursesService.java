@@ -1,6 +1,5 @@
 package AdvSe.LMS.courses.services;
 
-import AdvSe.LMS.courses.dtos.CourseDto;
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.dtos.UpdateCourseDto;
 import AdvSe.LMS.courses.entities.Course;
@@ -34,16 +33,11 @@ public class CoursesService {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
     }
 
-    public CourseDto getCourseDto(Integer course_id) {
-        Course course = getCourseById(course_id);
-        return new CourseDto(course);
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
     }
 
-    public List<CourseDto> getAllCourses() {
-        return CourseDto.fromList(courseRepository.findAll());
-    }
-
-    public CourseDto createCourse(CreateCourseDto createCourseDto) {
+    public Course createCourse(CreateCourseDto createCourseDto) {
         Instructor instructor = instructorsRepository.findById(createCourseDto.getInstructorId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Instructor not found"));
         Course course = new Course();
@@ -51,10 +45,10 @@ public class CoursesService {
         course.setInstructor(instructor);
         course.setDescription(createCourseDto.getDescription());
         course.setCourseCode(createCourseDto.getCourseCode());
-        return new CourseDto(courseRepository.save(course));
+        return courseRepository.save(course);
     }
 
-    public CourseDto updateCourse(Integer course_id, UpdateCourseDto updateCourseDto, String instructorId) {
+    public Course updateCourse(Integer course_id, UpdateCourseDto updateCourseDto, String instructorId) {
         Course course = getCourseById(course_id);
         if (!course.getInstructor().getId().equals(instructorId))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
@@ -65,7 +59,7 @@ public class CoursesService {
             course.setDescription(updateCourseDto.getDescription());
         if (updateCourseDto.getCourseCode() != null)
             course.setCourseCode(updateCourseDto.getCourseCode());
-        return new CourseDto(courseRepository.save(course));
+        return courseRepository.save(course);
 
     }
 

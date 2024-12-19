@@ -8,6 +8,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Arrays;
 
@@ -24,7 +27,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             validationException.addError(fieldName + " " + errorMessage);
         });
-        return new ResponseEntity<>(validationException, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationException);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -40,7 +43,30 @@ public class GlobalExceptionHandler {
         ValidationException validationException = new ValidationException();
         validationException.setStatus(400);
         validationException.addError(errorDetails);
-        return new ResponseEntity<>(validationException, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationException);
     }
 
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ValidationException> handleMultipartException(MultipartException ex) {
+        ValidationException validationException = new ValidationException();
+        validationException.setStatus(400);
+        validationException.addError("Invalid multipart request: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationException);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ValidationException> handleResponseStatusException(ResponseStatusException ex) {
+        ValidationException validationException = new ValidationException();
+        validationException.setStatus(ex.getStatusCode().value());
+        validationException.addError(ex.getReason());
+        return ResponseEntity.status(ex.getStatusCode()).body(validationException);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ValidationException> handleNoResourceFoundException(NoResourceFoundException ex) {
+        ValidationException validationException = new ValidationException();
+        validationException.setStatus(404);
+        validationException.addError(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(validationException);
+    }
 }

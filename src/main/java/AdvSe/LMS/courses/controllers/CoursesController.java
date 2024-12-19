@@ -1,8 +1,8 @@
 package AdvSe.LMS.courses.controllers;
 
-import AdvSe.LMS.courses.dtos.CourseDto;
 import AdvSe.LMS.courses.dtos.CreateCourseDto;
 import AdvSe.LMS.courses.dtos.UpdateCourseDto;
+import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.services.CoursesService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,19 +22,19 @@ public class CoursesController {
     }
 
     @GetMapping("/{course_id}")
-    CourseDto getCourseById(@PathVariable("course_id") Integer course_id) {
-        return coursesService.getCourseDto(course_id);
+    Course getCourseById(@PathVariable("course_id") Integer course_id) {
+        return coursesService.getCourseById(course_id);
     }
 
     @GetMapping("")
-    List<CourseDto> getAllCourses() {
+    List<Course> getAllCourses() {
         return coursesService.getAllCourses();
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    CourseDto postCourse(
+    Course postCourse(
             @Valid @RequestBody CreateCourseDto createCourseDto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
@@ -44,7 +44,7 @@ public class CoursesController {
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PutMapping("/{course_id}")
-    CourseDto updateCourse(
+    Course updateCourse(
             @PathVariable("course_id") Integer course_id,
             @RequestBody UpdateCourseDto updateCourseDto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user

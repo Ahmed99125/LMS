@@ -41,7 +41,7 @@ public class QuizzesService {
 
         Quiz quiz = quizzesRepository.findById(quiz_id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
 
-        if (quiz.getCourse().getId().equals(course_id)) throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
+        if (!quiz.getCourse().getId().equals(course_id)) throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
 
         return quiz;
     }

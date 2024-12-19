@@ -39,6 +39,10 @@ public class AssignmentSubmission {
     )
     private List<CloudinaryFile> submissionFiles = new ArrayList<>();
 
+    private String feedback;
+
+    private Double score;
+
     public void addSubmissionFile(CloudinaryFile assignmentFile) {
         submissionFiles.add(assignmentFile);
     }

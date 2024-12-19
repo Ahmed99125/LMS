@@ -1,7 +1,6 @@
 package AdvSe.LMS.courses.controllers;
 
 import AdvSe.LMS.courses.entities.Lessons.Lesson;
-import AdvSe.LMS.courses.repositories.LessonsRepository;
 import AdvSe.LMS.courses.services.LessonsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,11 +14,9 @@ import java.util.List;
 @RequestMapping("/api/courses/{course_id}/lessons")
 public class LessonsController {
     private final LessonsService lessonsService;
-    private final LessonsRepository lessonsRepository;
 
-    public LessonsController(LessonsService lessonsService, LessonsRepository lessonsRepository) {
+    public LessonsController(LessonsService lessonsService) {
         this.lessonsService = lessonsService;
-        this.lessonsRepository = lessonsRepository;
     }
 
     @GetMapping("")

@@ -36,7 +36,7 @@ public class AssignmentsController {
     @ResponseStatus(HttpStatus.CREATED)
     Assignment postAssignment(
             @PathVariable("course_id") Integer course_id,
-            @RequestPart("data") String name,
+            @RequestPart("name") String name,
             @RequestPart("files") List<MultipartFile> files,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
@@ -48,7 +48,7 @@ public class AssignmentsController {
     Assignment updateAssignment(
             @PathVariable("course_id") Integer course_id,
             @PathVariable("assignment_id") Integer assignment_id,
-            @RequestPart("data") String name,
+            @RequestPart("name") String name,
             @RequestPart("files") List<MultipartFile> files,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {

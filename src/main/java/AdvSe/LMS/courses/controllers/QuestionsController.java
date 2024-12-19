@@ -1,6 +1,7 @@
 package AdvSe.LMS.courses.controllers;
 
 import AdvSe.LMS.courses.dtos.CreateQuestionDto;
+import AdvSe.LMS.courses.dtos.ShowQuestionDto;
 import AdvSe.LMS.courses.dtos.UpdateQuestionDto;
 import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.services.QuestionsService;
@@ -11,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -25,43 +27,48 @@ public class QuestionsController {
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @GetMapping("")
-    List<Question> getQuestions(
+    List<ShowQuestionDto> getQuestions(
             @PathVariable("course_id") Integer course_id,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return questionsService.getQuestionsByCourseId(course_id, user.getUsername());
+        List<Question> questions = questionsService.getQuestionsByCourseId(course_id, user.getUsername());
+        List<ShowQuestionDto> showedQuestions = new ArrayList<>();
+        for (Question question : questions) {
+            showedQuestions.add(new ShowQuestionDto(question));
+        }
+        return showedQuestions;
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @GetMapping("/{question_id}")
-    Question getQuestionById(
+    ShowQuestionDto getQuestionById(
             @PathVariable("course_id") Integer course_id,
             @PathVariable("question_id") Integer question_id,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return questionsService.getQuestionById(course_id, question_id, user.getUsername());
+        return new ShowQuestionDto(questionsService.getQuestionById(course_id, question_id, user.getUsername()));
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    Question postQuestion(
+    ShowQuestionDto postQuestion(
             @PathVariable("course_id") Integer course_id,
             @Valid @RequestBody CreateQuestionDto createQuestionDto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return questionsService.createQuestion(course_id, createQuestionDto, user.getUsername());
+        return new ShowQuestionDto(questionsService.createQuestion(course_id, createQuestionDto, user.getUsername()));
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PutMapping("/{question_id}")
-    Question updateQuestion(
+    ShowQuestionDto updateQuestion(
             @PathVariable("course_id") Integer course_id,
             @PathVariable("question_id") Integer question_id,
             @Valid @RequestBody UpdateQuestionDto updateQuestionDto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return questionsService.updateQuestion(course_id, question_id, updateQuestionDto, user.getUsername());
+        return new ShowQuestionDto(questionsService.updateQuestion(course_id, question_id, updateQuestionDto, user.getUsername()));
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")

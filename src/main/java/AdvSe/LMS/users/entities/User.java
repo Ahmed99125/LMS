@@ -2,7 +2,6 @@ package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,7 +39,7 @@ public class User {
     private CloudinaryFile profilePicture;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Notification> notifications = new ArrayList<>();
 
     public User(String id, String name, String password, String email, String phone, CloudinaryFile profilePicture) {
@@ -50,15 +49,6 @@ public class User {
         this.email = email;
         this.phone = phone;
         this.profilePicture = profilePicture;
-    }
-
-    public User(User user) {
-        this.id = user.getId();
-        this.name = user.getName();
-        this.password = user.getPassword();
-        this.email = user.getEmail();
-        this.phone = user.getPhone();
-        this.profilePicture = user.getProfilePicture();
     }
 
     public void addNotification(Notification notification) {

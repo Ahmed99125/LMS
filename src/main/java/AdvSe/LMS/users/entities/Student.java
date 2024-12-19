@@ -2,7 +2,7 @@ package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +24,7 @@ public class Student extends User {
             joinColumns = @JoinColumn(name = "student_id"), // Foreign key in join table for Student
             inverseJoinColumns = @JoinColumn(name = "course_id") // Foreign key in join table for Course
     )
-    @JsonManagedReference
+    @JsonBackReference
     private List<Course> courses = new ArrayList<>();
 
     public Student(String id, String name, String password, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
