@@ -2,12 +2,14 @@ package AdvSe.LMS.courses.services;
 
 import AdvSe.LMS.courses.dtos.submissions.QuestionSubmissionDto;
 import AdvSe.LMS.courses.dtos.submissions.QuizSubmissionDto;
-import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.courses.entities.Questions.Submissions.QuestionAnswer;
 import AdvSe.LMS.courses.entities.Questions.Submissions.QuizSubmission;
-import AdvSe.LMS.courses.repositories.*;
+import AdvSe.LMS.courses.repositories.QuestionAnswersRepository;
+import AdvSe.LMS.courses.repositories.QuestionsRepository;
+import AdvSe.LMS.courses.repositories.QuizSubmissionsRepository;
+import AdvSe.LMS.courses.repositories.QuizzesRepository;
 import AdvSe.LMS.users.entities.Student;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,29 +22,22 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Service
 public class QuizSubmissionsService {
     private final QuizSubmissionsRepository quizSubmissionsRepository;
-    private final CoursesRepository courseRepository;
     private final QuizzesRepository quizzesRepository;
     private final QuestionAnswersRepository questionAnswersRepository;
 
-    public QuizSubmissionsService(QuizSubmissionsRepository quizSubmissionsRepository, CoursesRepository courseRepository, QuizzesRepository quizzesRepository, QuestionsRepository questionsRepository, QuestionAnswersRepository questionAnswersRepository) {
+    public QuizSubmissionsService(QuizSubmissionsRepository quizSubmissionsRepository, QuizzesRepository quizzesRepository, QuestionsRepository questionsRepository, QuestionAnswersRepository questionAnswersRepository) {
         this.quizSubmissionsRepository = quizSubmissionsRepository;
-        this.courseRepository = courseRepository;
         this.quizzesRepository = quizzesRepository;
         this.questionAnswersRepository = questionAnswersRepository;
     }
 
-
-    public List<QuizSubmission> getQuizSubmissions(Integer courseId, Integer quizId, String instructorId) {
-        if (!courseRepository.existsById(courseId)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Quiz quiz = quizzesRepository.findById(quizId)
+    private Quiz getQuizOrThrow(Integer quizId) {
+        return quizzesRepository.findById(quizId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
+    }
 
-        if (!quiz.getCourse().getId().equals(courseId)) {
-            throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
-        }
+    public List<QuizSubmission> getQuizSubmissions(Integer quizId, String instructorId) {
+        Quiz quiz = getQuizOrThrow(quizId);
 
         if (!quiz.getCourse().getInstructor().getId().equals(instructorId))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
@@ -50,51 +45,29 @@ public class QuizSubmissionsService {
         return quiz.getSubmissions();
     }
 
-    public QuizSubmission getQuizSubmission(Integer courseId, Integer quizId, String studentId, String instructorId) {
-        if (!courseRepository.existsById(courseId)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Quiz quiz = quizzesRepository.findById(quizId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
-
-        if (!quiz.getCourse().getId().equals(courseId)) {
-            throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
-        }
+    public QuizSubmission getQuizSubmissionByStudentId(Integer quizId, String studentId, String instructorId) {
+        Quiz quiz = getQuizOrThrow(quizId);
 
         if (!quiz.getCourse().getInstructor().getId().equals(instructorId))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
-        return quizSubmissionsRepository.findByQuizIdAndStudentId(quizId, studentId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz submission not found"));
-
+        return getMyQuizSubmission(quizId, studentId);
     }
 
-    public QuizSubmission getMyQuizSubmission(Integer courseId, Integer quizId, String studentId) {
-        if (!courseRepository.existsById(courseId)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Quiz quiz = quizzesRepository.findById(quizId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
-
-        if (!quiz.getCourse().getId().equals(courseId)) {
-            throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
-        }
-
+    public QuizSubmission getMyQuizSubmission(Integer quizId, String studentId) {
         return quizSubmissionsRepository.findByQuizIdAndStudentId(quizId, studentId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz submission not found"));
     }
 
     public QuizSubmission submitQuiz(QuizSubmissionDto quizSubmissionDto) {
-        Course course = courseRepository.findById(quizSubmissionDto.getCourseId())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+        Quiz quiz = getQuizOrThrow(quizSubmissionDto.getQuizId());
 
-        Student student = course.getStudents().stream().filter(s -> s.getId().equals(quizSubmissionDto.getStudentId())).findFirst()
+        Student student = quiz.getCourse().getStudents().stream().filter(s -> s.getId().equals(quizSubmissionDto.getStudentId())).findFirst()
                 .orElseThrow(() -> new ResponseStatusException(FORBIDDEN, "You are not enrolled in this course"));
 
-        Quiz quiz = quizzesRepository.findById(quizSubmissionDto.getQuizId())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
+        if (quizSubmissionsRepository.existsByQuizIdAndStudentId(quiz.getId(), student.getId())) {
+            throw new ResponseStatusException(FORBIDDEN, "You have already submitted this quiz");
+        }
 
         List<Integer> questionIds = quizSubmissionDto.getAnswers().stream().map(QuestionSubmissionDto::getQuestionId).toList();
         List<Question> questions = quiz.getQuestions().stream().filter(question -> questionIds.contains(question.getId())).toList();

@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface QuizSubmissionsRepository extends JpaRepository<QuizSubmission, Integer> {
     Optional<QuizSubmission> findByQuizIdAndStudentId(Integer quizId, String studentId);
+
+    boolean existsByQuizIdAndStudentId(Integer quizId, String studentId);
 }

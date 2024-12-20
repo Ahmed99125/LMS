@@ -13,9 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizSubmissionDto {
-    private Integer courseId;
+    @NotNull
     private Integer quizId;
-    private String studentId;
     @NotNull
     private List<QuestionSubmissionDto> answers;
+    private String studentId;
 }
