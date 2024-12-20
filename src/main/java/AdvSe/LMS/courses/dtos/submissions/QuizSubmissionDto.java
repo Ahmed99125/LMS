@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizSubmissionDto {
-    @NotNull
     private Integer quizId;
     @NotNull
     private List<QuestionSubmissionDto> answers;

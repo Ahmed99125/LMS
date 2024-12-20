@@ -51,7 +51,7 @@ public class QuestionsController {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     ShowQuestionDto postQuestion(
-            @Valid @ModelAttribute CreateQuestionDto createQuestionDto,
+            @Valid @RequestBody CreateQuestionDto createQuestionDto,
             @AuthenticationPrincipal User user
     ) {
         createQuestionDto.setInstructorId(user.getUsername());
@@ -61,9 +61,11 @@ public class QuestionsController {
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PutMapping("/{questionId}")
     ShowQuestionDto updateQuestion(
-            @Valid @ModelAttribute UpdateQuestionDto updateQuestionDto,
+            @PathVariable("questionId") Integer questionId,
+            @Valid @RequestBody UpdateQuestionDto updateQuestionDto,
             @AuthenticationPrincipal User user
     ) {
+        updateQuestionDto.setQuestionId(questionId);
         updateQuestionDto.setInstructorId(user.getUsername());
         return new ShowQuestionDto(questionsService.updateQuestion(updateQuestionDto));
     }

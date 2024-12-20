@@ -55,9 +55,11 @@ public class QuizSubmissionsController {
     @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping("")
     public QuizSubmission submitQuiz(
-            @ModelAttribute QuizSubmissionDto quizSubmissionDto,
+            @PathVariable("quizId") Integer quizId,
+            @RequestBody QuizSubmissionDto quizSubmissionDto,
             @AuthenticationPrincipal User user
     ) {
+        quizSubmissionDto.setQuizId(quizId);
         quizSubmissionDto.setStudentId(user.getUsername());
         return quizSubmissionsService.submitQuiz(quizSubmissionDto);
     }

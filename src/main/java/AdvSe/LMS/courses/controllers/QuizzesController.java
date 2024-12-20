@@ -36,7 +36,7 @@ public class QuizzesController {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     Quiz postQuiz(
-            @Valid @ModelAttribute QuizDto quizDto,
+            @Valid @RequestBody QuizDto quizDto,
             @AuthenticationPrincipal User user
     ) {
         quizDto.setInstructorId(user.getUsername());
@@ -47,7 +47,7 @@ public class QuizzesController {
     @PostMapping("generate_quiz")
     @ResponseStatus(HttpStatus.CREATED)
     Quiz generateQuiz(
-            @Valid @ModelAttribute GenerateQuizDto generateQuizDto,
+            @Valid @RequestBody GenerateQuizDto generateQuizDto,
             @AuthenticationPrincipal User user
     ) {
         generateQuizDto.setInstructorId(user.getUsername());

@@ -4,6 +4,8 @@ import AdvSe.LMS.courses.dtos.submissions.AssignmentFeedbackDto;
 import AdvSe.LMS.courses.dtos.submissions.AssignmentSubmissionDto;
 import AdvSe.LMS.courses.entities.Questions.Submissions.AssignmentSubmission;
 import AdvSe.LMS.courses.services.AssignmentSubmissionsService;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -54,9 +56,9 @@ public class AssignmentSubmissionsController {
 
     // This method is used to submit an assignment
     @PreAuthorize("hasAuthority('STUDENT')")
-    @PostMapping("")
+    @PostMapping(path = "", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public AssignmentSubmission submitAssignment(
-            @ModelAttribute AssignmentSubmissionDto assignmentSubmissionDto,
+            @Valid @ModelAttribute AssignmentSubmissionDto assignmentSubmissionDto,
             @AuthenticationPrincipal User user
     ) {
         return assignmentSubmissionsService.submitAssignment(assignmentSubmissionDto);
@@ -66,9 +68,13 @@ public class AssignmentSubmissionsController {
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PutMapping("/{studentId}/grade")
     public AssignmentSubmission gradeAssignment(
-            @ModelAttribute AssignmentFeedbackDto assignmentFeedbackDto,
+            @PathVariable("assignmentId") Integer assignmentId,
+            @PathVariable("studentId") String studentId,
+            @Valid @RequestBody AssignmentFeedbackDto assignmentFeedbackDto,
             @AuthenticationPrincipal User user
     ) {
+        assignmentFeedbackDto.setAssignmentId(assignmentId);
+        assignmentFeedbackDto.setStudentId(studentId);
         assignmentFeedbackDto.setInstructorId(user.getUsername());
         return assignmentSubmissionsService.gradeAssignment(assignmentFeedbackDto);
     }
