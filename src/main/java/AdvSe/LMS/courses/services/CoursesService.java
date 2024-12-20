@@ -28,8 +28,8 @@ public class CoursesService {
         this.studentsRepository = studentsRepository;
     }
 
-    public Course getCourseById(Integer course_id) {
-        return courseRepository.findById(course_id)
+    public Course getCourseById(Integer courseId) {
+        return courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
     }
 
@@ -48,8 +48,8 @@ public class CoursesService {
         return courseRepository.save(course);
     }
 
-    public Course updateCourse(Integer course_id, UpdateCourseDto updateCourseDto, String instructorId) {
-        Course course = getCourseById(course_id);
+    public Course updateCourse(Integer courseId, UpdateCourseDto updateCourseDto, String instructorId) {
+        Course course = getCourseById(courseId);
         if (!course.getInstructor().getId().equals(instructorId))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
@@ -73,8 +73,8 @@ public class CoursesService {
         studentsRepository.save(student);
     }
 
-    public void deleteCourse(Integer course_id, String instructorId) {
-        Course course = getCourseById(course_id);
+    public void deleteCourse(Integer courseId, String instructorId) {
+        Course course = getCourseById(courseId);
         if (!course.getInstructor().getId().equals(instructorId))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
         courseRepository.delete(course);

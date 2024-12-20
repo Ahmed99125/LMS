@@ -14,9 +14,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CreateQuestionDto {
     @NotNull
+    private Integer courseId;
+    @NotNull
     private QuestionType type;
     @NotBlank
     private String question;
     @NotBlank
     private String answer;
+    private String instructorId;
 }

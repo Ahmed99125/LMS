@@ -34,8 +34,8 @@ public class LessonsService {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Lesson not found"));
     }
 
-    public List<Lesson> getLessonsByCourseId(Integer course_id) {
-        Course course = courseRepository.findById(course_id)
+    public List<Lesson> getLessonsByCourseId(Integer courseId) {
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
         return course.getLessons();

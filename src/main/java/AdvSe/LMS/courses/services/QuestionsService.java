@@ -24,16 +24,9 @@ public class QuestionsService {
         this.courseRepository = courseRepository;
     }
 
-    public Question getQuestionById(Integer course_id, Integer question_id, String instructorId) {
-        if (!courseRepository.existsById(course_id)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Question question = questionsRepository.findById(question_id)
+    public Question getQuestionById(Integer questionId, String instructorId) {
+        Question question = questionsRepository.findById(questionId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Question not found"));
-
-        if (!question.getCourse().getId().equals(course_id))
-            throw new ResponseStatusException(NOT_FOUND, "Question not found");
 
         if (!question.getCourse().getInstructor().getId().equals(instructorId))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
@@ -41,8 +34,8 @@ public class QuestionsService {
         return question;
     }
 
-    public List<Question> getQuestionsByCourseId(Integer course_id, String instructorId) {
-        Course course = courseRepository.findById(course_id)
+    public List<Question> getQuestionsByCourseId(Integer courseId, String instructorId) {
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
         if (!course.getInstructor().getId().equals(instructorId))
@@ -51,11 +44,11 @@ public class QuestionsService {
         return course.getQuestions();
     }
 
-    public Question createQuestion(Integer course_id, CreateQuestionDto createQuestionDto, String instructorId) {
-        Course course = courseRepository.findById(course_id)
+    public Question createQuestion(CreateQuestionDto createQuestionDto) {
+        Course course = courseRepository.findById(createQuestionDto.getCourseId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
-        if (!course.getInstructor().getId().equals(instructorId))
+        if (!course.getInstructor().getId().equals(createQuestionDto.getInstructorId()))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
         Question question = new Question();
@@ -67,8 +60,8 @@ public class QuestionsService {
         return questionsRepository.save(question);
     }
 
-    public Question updateQuestion(Integer course_id, Integer Question_id, UpdateQuestionDto updateQuestionDto, String instructorId) {
-        Question question = getQuestionById(course_id, Question_id, instructorId);
+    public Question updateQuestion(UpdateQuestionDto updateQuestionDto) {
+        Question question = getQuestionById(updateQuestionDto.getQuestionId(), updateQuestionDto.getInstructorId());
 
         if (updateQuestionDto.getType() != null)
             question.setType(updateQuestionDto.getType());
@@ -79,8 +72,8 @@ public class QuestionsService {
         return questionsRepository.save(question);
     }
 
-    public void deleteQuestion(Integer course_id, Integer question_id, String instructorId) {
-        Question question = getQuestionById(course_id, question_id, instructorId);
+    public void deleteQuestion(Integer questionId, String instructorId) {
+        Question question = getQuestionById(questionId, instructorId);
         questionsRepository.delete(question);
     }
 }

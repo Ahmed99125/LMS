@@ -15,7 +15,10 @@ import java.util.Set;
 @AllArgsConstructor
 public class QuizDto {
     @NotBlank
+    private Integer courseId;
+    @NotBlank
     private String name;
     @NotNull
     private Set<Integer> questionIds;
+    private String instructorId;
 }

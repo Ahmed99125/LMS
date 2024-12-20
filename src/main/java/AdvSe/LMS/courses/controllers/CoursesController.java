@@ -21,9 +21,9 @@ public class CoursesController {
         this.coursesService = coursesService;
     }
 
-    @GetMapping("/{course_id}")
-    Course getCourseById(@PathVariable("course_id") Integer course_id) {
-        return coursesService.getCourseById(course_id);
+    @GetMapping("/{courseId}")
+    Course getCourseById(@PathVariable("courseId") Integer courseId) {
+        return coursesService.getCourseById(courseId);
     }
 
     @GetMapping("")
@@ -43,32 +43,32 @@ public class CoursesController {
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @PutMapping("/{course_id}")
+    @PutMapping("/{courseId}")
     Course updateCourse(
-            @PathVariable("course_id") Integer course_id,
+            @PathVariable("courseId") Integer courseId,
             @RequestBody UpdateCourseDto updateCourseDto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        return coursesService.updateCourse(course_id, updateCourseDto, user.getUsername());
+        return coursesService.updateCourse(courseId, updateCourseDto, user.getUsername());
     }
 
     @PreAuthorize("hasAuthority('STUDENT')")
-    @PutMapping("/{course_id}/students")
+    @PutMapping("/{courseId}/students")
     void addStudentToCourse(
-            @PathVariable("course_id") Integer course_id,
+            @PathVariable("courseId") Integer courseId,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        coursesService.addStudentToCourse(course_id, user.getUsername());
+        coursesService.addStudentToCourse(courseId, user.getUsername());
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @DeleteMapping("/{course_id}")
+    @DeleteMapping("/{courseId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteCourse(
-            @PathVariable("course_id") Integer course_id,
+            @PathVariable("courseId") Integer courseId,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        coursesService.deleteCourse(course_id, user.getUsername());
+        coursesService.deleteCourse(courseId, user.getUsername());
     }
 }
 

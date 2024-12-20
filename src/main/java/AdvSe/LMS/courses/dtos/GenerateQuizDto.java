@@ -13,7 +13,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GenerateQuizDto {
     @NotBlank
+    private Integer courseId;
+    @NotBlank
     private String name;
     @NotNull
     private Integer numberOfQuestions;
+    private String instructorId;
 }

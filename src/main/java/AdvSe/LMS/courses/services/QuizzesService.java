@@ -14,8 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 public class QuizzesService {
@@ -28,36 +27,29 @@ public class QuizzesService {
         this.courseRepository = courseRepository;
     }
 
-    public List<Quiz> getQuestionsByCourseId(Integer course_id) {
-        Course course = courseRepository.findById(course_id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
+    public List<Quiz> getQuestionsByCourseId(Integer courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
         return course.getQuizzes();
     }
 
-    public Quiz getQuizById(Integer course_id, Integer quiz_id) {
-        if (!courseRepository.existsById(course_id)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Quiz quiz = quizzesRepository.findById(quiz_id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
-
-        if (!quiz.getCourse().getId().equals(course_id)) throw new ResponseStatusException(NOT_FOUND, "Quiz not found");
-
-        return quiz;
+    public Quiz getQuizById(Integer quizId) {
+        return quizzesRepository.findById(quizId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Quiz not found"));
     }
 
-    public Quiz createQuiz(Integer courseId, QuizDto quizDto, String instructorId) {
-        Course course = courseRepository.findById(courseId)
+    public Quiz createQuiz(QuizDto quizDto) {
+        Course course = courseRepository.findById(quizDto.getCourseId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
-        if (!course.getInstructor().getId().equals(instructorId)) {
-            throw new ResponseStatusException(BAD_REQUEST, "This course does not belong to you");
+        if (!course.getInstructor().getId().equals(quizDto.getInstructorId())) {
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
         }
 
         Set<Integer> questionIds = quizDto.getQuestionIds();
         List<Question> questions = course.getQuestions().stream().filter(question -> questionIds.contains(question.getId())).toList();
         if (questions.size() != questionIds.size()) {
-            throw new ResponseStatusException(NOT_FOUND, "Question not found");
+            throw new ResponseStatusException(BAD_REQUEST, "Some questions not found");
         }
         Quiz quiz = new Quiz();
         quiz.setCourse(course);
@@ -68,11 +60,11 @@ public class QuizzesService {
         return quizzesRepository.save(quiz);
     }
 
-    public Quiz generateQuiz(Integer courseId, GenerateQuizDto generateQuizDto, String instructorId) {
-        Course course = courseRepository.findById(courseId)
+    public Quiz generateQuiz(GenerateQuizDto generateQuizDto) {
+        Course course = courseRepository.findById(generateQuizDto.getCourseId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
-        if (!course.getInstructor().getId().equals(instructorId)) {
+        if (!course.getInstructor().getId().equals(generateQuizDto.getInstructorId())) {
             throw new ResponseStatusException(BAD_REQUEST, "This course does not belong to you");
         }
 
@@ -91,11 +83,13 @@ public class QuizzesService {
         return quizzesRepository.save(quiz);
     }
 
-    public void deleteQuiz(Integer courseId, Integer quizId, String instructorId) {
-        Quiz quiz = getQuizById(courseId, quizId);
+    public void deleteQuiz(Integer quizId, String instructorId) {
+        Quiz quiz = getQuizById(quizId);
+
         if (!quiz.getCourse().getInstructor().getId().equals(instructorId)) {
             throw new ResponseStatusException(BAD_REQUEST, "This quiz does not belong to you");
         }
+
         quizzesRepository.delete(quiz);
     }
 }

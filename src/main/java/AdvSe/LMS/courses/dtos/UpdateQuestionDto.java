@@ -11,7 +11,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateQuestionDto {
+    private Integer questionId;
     private QuestionType type;
     private String question;
     private String answer;
+    private String instructorId;
 }

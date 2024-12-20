@@ -6,18 +6,17 @@ import AdvSe.LMS.courses.dtos.UpdateQuestionDto;
 import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.services.QuestionsService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/courses/{course_id}/questions")
+@RequestMapping("/api/questions")
 public class QuestionsController {
     private final QuestionsService questionsService;
 
@@ -28,10 +27,10 @@ public class QuestionsController {
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @GetMapping("")
     List<ShowQuestionDto> getQuestions(
-            @PathVariable("course_id") Integer course_id,
+            @RequestParam Integer courseId,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
     ) {
-        List<Question> questions = questionsService.getQuestionsByCourseId(course_id, user.getUsername());
+        List<Question> questions = questionsService.getQuestionsByCourseId(courseId, user.getUsername());
         List<ShowQuestionDto> showedQuestions = new ArrayList<>();
         for (Question question : questions) {
             showedQuestions.add(new ShowQuestionDto(question));
@@ -40,45 +39,42 @@ public class QuestionsController {
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @GetMapping("/{question_id}")
+    @GetMapping("/{questionId}")
     ShowQuestionDto getQuestionById(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("question_id") Integer question_id,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @PathVariable("questionId") Integer questionId,
+            @AuthenticationPrincipal User user
     ) {
-        return new ShowQuestionDto(questionsService.getQuestionById(course_id, question_id, user.getUsername()));
+        return new ShowQuestionDto(questionsService.getQuestionById(questionId, user.getUsername()));
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     ShowQuestionDto postQuestion(
-            @PathVariable("course_id") Integer course_id,
-            @Valid @RequestBody CreateQuestionDto createQuestionDto,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @Valid @ModelAttribute CreateQuestionDto createQuestionDto,
+            @AuthenticationPrincipal User user
     ) {
-        return new ShowQuestionDto(questionsService.createQuestion(course_id, createQuestionDto, user.getUsername()));
+        createQuestionDto.setInstructorId(user.getUsername());
+        return new ShowQuestionDto(questionsService.createQuestion(createQuestionDto));
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @PutMapping("/{question_id}")
+    @PutMapping("/{questionId}")
     ShowQuestionDto updateQuestion(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("question_id") Integer question_id,
-            @Valid @RequestBody UpdateQuestionDto updateQuestionDto,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @Valid @ModelAttribute UpdateQuestionDto updateQuestionDto,
+            @AuthenticationPrincipal User user
     ) {
-        return new ShowQuestionDto(questionsService.updateQuestion(course_id, question_id, updateQuestionDto, user.getUsername()));
+        updateQuestionDto.setInstructorId(user.getUsername());
+        return new ShowQuestionDto(questionsService.updateQuestion(updateQuestionDto));
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @DeleteMapping("/{question_id}")
+    @DeleteMapping("/{questionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteQuestion(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("question_id") Integer question_id,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @PathVariable("questionId") Integer questionId,
+            @AuthenticationPrincipal User user
     ) {
-        questionsService.deleteQuestion(course_id, question_id, user.getUsername());
+        questionsService.deleteQuestion(questionId, user.getUsername());
     }
 }
