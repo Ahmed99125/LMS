@@ -1,17 +1,20 @@
 package AdvSe.LMS.courses.controllers;
 
+import AdvSe.LMS.courses.dtos.CreateAssignmentDto;
+import AdvSe.LMS.courses.dtos.UpdateAssignmentDto;
 import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.services.AssignmentsService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses/{course_id}/assignments")
+@RequestMapping("/api/assignments")
 public class AssignmentsController {
     private final AssignmentsService assignmentsService;
 
@@ -20,49 +23,43 @@ public class AssignmentsController {
     }
 
     @GetMapping("")
-    List<Assignment> getAssignments(@PathVariable("course_id") Integer course_id) {
-        return assignmentsService.getAssignmentsByCourseId(course_id);
+    List<Assignment> getAssignments(@RequestParam Integer courseId) {
+        return assignmentsService.getAssignmentsByCourseId(courseId);
     }
 
-    @GetMapping("/{assignment_id}")
-    Assignment getAssignmentById(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("assignment_id") Integer assignment_id) {
-        return assignmentsService.getAssignmentById(course_id, assignment_id);
+    @GetMapping("/{assignmentId}")
+    Assignment getAssignmentById(@PathVariable("assignmentId") Integer assignmentId) {
+        return assignmentsService.getAssignmentById(assignmentId);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @PostMapping("")
+    @PostMapping(path = "", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     Assignment postAssignment(
-            @PathVariable("course_id") Integer course_id,
-            @RequestPart("name") String name,
-            @RequestPart("files") List<MultipartFile> files,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @ModelAttribute CreateAssignmentDto createAssignmentDto,
+            @AuthenticationPrincipal User user
     ) {
-        return assignmentsService.createAssignment(course_id, user.getUsername(), name, files);
+        createAssignmentDto.setInstructorId(user.getUsername());
+        return assignmentsService.createAssignment(createAssignmentDto);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @PutMapping("/{assignment_id}")
+    @PutMapping(path = "/{assignmentId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     Assignment updateAssignment(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("assignment_id") Integer assignment_id,
-            @RequestPart("name") String name,
-            @RequestPart("files") List<MultipartFile> files,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @ModelAttribute UpdateAssignmentDto updateAssignmentDto,
+            @AuthenticationPrincipal User user
     ) {
-        return assignmentsService.updateAssignment(course_id, user.getUsername(), assignment_id, name, files);
+        updateAssignmentDto.setInstructorId(user.getUsername());
+        return assignmentsService.updateAssignment(updateAssignmentDto);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @DeleteMapping("/{assignment_id}")
+    @DeleteMapping("/{assignmentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteAssignment(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("assignment_id") Integer assignment_id,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @PathVariable("assignmentId") Integer assignmentId,
+            @AuthenticationPrincipal User user
     ) {
-        assignmentsService.deleteAssignment(course_id, user.getUsername(), assignment_id);
+        assignmentsService.deleteAssignment(assignmentId, user.getUsername());
     }
 }

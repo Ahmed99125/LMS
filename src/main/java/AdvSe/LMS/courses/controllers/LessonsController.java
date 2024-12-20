@@ -1,17 +1,20 @@
 package AdvSe.LMS.courses.controllers;
 
+import AdvSe.LMS.courses.dtos.CreateLessonDto;
+import AdvSe.LMS.courses.dtos.UpdateLessonDto;
 import AdvSe.LMS.courses.entities.Lessons.Lesson;
 import AdvSe.LMS.courses.services.LessonsService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses/{course_id}/lessons")
+@RequestMapping("/api/lessons")
 public class LessonsController {
     private final LessonsService lessonsService;
 
@@ -20,49 +23,43 @@ public class LessonsController {
     }
 
     @GetMapping("")
-    List<Lesson> getLessons(@PathVariable("course_id") Integer course_id) {
-        return lessonsService.getLessonsByCourseId(course_id);
+    List<Lesson> getLessons(@RequestParam Integer courseId) {
+        return lessonsService.getLessonsByCourseId(courseId);
     }
 
-    @GetMapping("/{lesson_id}")
-    Lesson getLessonById(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("lesson_id") Integer lesson_id) {
-        return lessonsService.getLessonById(course_id, lesson_id);
+    @GetMapping("/{lessonId}")
+    Lesson getLessonById(@PathVariable("lessonId") Integer lessonId) {
+        return lessonsService.getLessonById(lessonId);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @PostMapping("")
+    @PostMapping(path = "", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     Lesson postLesson(
-            @PathVariable("course_id") Integer course_id,
-            @RequestPart("data") String name,
-            @RequestPart("files") List<MultipartFile> files,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @ModelAttribute CreateLessonDto createLessonDto,
+            @AuthenticationPrincipal User user
     ) {
-        return lessonsService.createLesson(course_id, user.getUsername(), name, files);
+        createLessonDto.setInstructorId(user.getUsername());
+        return lessonsService.createLesson(createLessonDto);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @PutMapping("/{lesson_id}")
+    @PutMapping(path = "/{lessonId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     Lesson updateLesson(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("lesson_id") Integer lesson_id,
-            @RequestPart("data") String name,
-            @RequestPart("files") List<MultipartFile> files,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @ModelAttribute UpdateLessonDto updateLessonDto,
+            @AuthenticationPrincipal User user
     ) {
-        return lessonsService.updateLesson(course_id, user.getUsername(), lesson_id, name, files);
+        updateLessonDto.setInstructorId(user.getUsername());
+        return lessonsService.updateLesson(updateLessonDto);
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
-    @DeleteMapping("/{lesson_id}")
+    @DeleteMapping("/{lessonId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteLesson(
-            @PathVariable("course_id") Integer course_id,
-            @PathVariable("lesson_id") Integer lesson_id,
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User user
+            @PathVariable("lessonId") Integer lessonId,
+            @AuthenticationPrincipal User user
     ) {
-        lessonsService.deleteLesson(course_id, user.getUsername(), lesson_id);
+        lessonsService.deleteLesson(lessonId, user.getUsername());
     }
 }

@@ -2,6 +2,8 @@ package AdvSe.LMS.courses.services;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.cloudinary.CloudinaryService;
+import AdvSe.LMS.courses.dtos.CreateAssignmentDto;
+import AdvSe.LMS.courses.dtos.UpdateAssignmentDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.repositories.AssignmentsRepository;
@@ -27,44 +29,29 @@ public class AssignmentsService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    private Assignment getCheckedAssignmentById(Integer course_id, Integer assignment_id, String instructorId) {
-        Assignment assignment = getAssignmentById(course_id, assignment_id);
-        if (!assignment.getCourse().getInstructor().getId().equals(instructorId))
-            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
-        return assignment;
-    }
-
-    public Assignment getAssignmentById(Integer course_id, Integer assignment_id) {
-        if (!courseRepository.existsById(course_id)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Assignment assignment = assignmentsRepository.findById(assignment_id)
+    public Assignment getAssignmentById(Integer assignmentId) {
+        return assignmentsRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Assignment not found"));
-
-        if (!assignment.getCourse().getId().equals(course_id))
-            throw new ResponseStatusException(NOT_FOUND, "Assignment not found");
-
-        return assignment;
     }
 
-    public List<Assignment> getAssignmentsByCourseId(Integer course_id) {
-        Course course = courseRepository.findById(course_id)
+    public List<Assignment> getAssignmentsByCourseId(Integer courseId) {
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
         return course.getAssignments();
     }
 
-    public Assignment createAssignment(Integer course_id, String instructorId, String name, List<MultipartFile> files) {
-        Course course = courseRepository.findById(course_id)
+    public Assignment createAssignment(CreateAssignmentDto createAssignmentDto) {
+        Course course = courseRepository.findById(createAssignmentDto.getCourseId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
-        if (!course.getInstructor().getId().equals(instructorId))
+
+        if (!course.getInstructor().getId().equals(createAssignmentDto.getInstructorId()))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
         Assignment assignment = new Assignment();
         assignment.setCourse(course);
-        assignment.setName(name);
-        for (MultipartFile file : files) {
+        assignment.setName(createAssignmentDto.getName());
+        for (MultipartFile file : createAssignmentDto.getFiles()) {
             CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "assignments");
             assignment.addAssignmentFile(cloudinaryFile);
         }
@@ -72,20 +59,32 @@ public class AssignmentsService {
         return assignmentsRepository.save(assignment);
     }
 
-    public Assignment updateAssignment(Integer course_id, String instructorId, Integer assignment_id, String name, List<MultipartFile> files) {
-        Assignment assignment = getCheckedAssignmentById(course_id, assignment_id, instructorId);
+    public Assignment updateAssignment(UpdateAssignmentDto updateAssignmentDto) {
+        Assignment assignment = getAssignmentById(updateAssignmentDto.getAssignmentId());
 
-        assignment.setName(name);
-        for (MultipartFile file : files) {
-            CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "assignments");
-            assignment.addAssignmentFile(cloudinaryFile);
+        if (!assignment.getCourse().getInstructor().getId().equals(updateAssignmentDto.getInstructorId()))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+
+        if (updateAssignmentDto.getName() != null)
+            assignment.setName(updateAssignmentDto.getName());
+
+        if (updateAssignmentDto.getFiles() != null) {
+            assignment.getAssignmentFiles().clear();
+            for (MultipartFile file : updateAssignmentDto.getFiles()) {
+                CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "assignments");
+                assignment.addAssignmentFile(cloudinaryFile);
+            }
         }
 
         return assignmentsRepository.save(assignment);
     }
 
-    public void deleteAssignment(Integer course_id, String instructorId, Integer assignment_id) {
-        Assignment assignment = getCheckedAssignmentById(course_id, assignment_id, instructorId);
+    public void deleteAssignment(Integer assignmentId, String instructorId) {
+        Assignment assignment = getAssignmentById(assignmentId);
+
+        if (!assignment.getCourse().getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+
         assignmentsRepository.delete(assignment);
     }
 }

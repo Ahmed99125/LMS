@@ -2,6 +2,8 @@ package AdvSe.LMS.courses.services;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.cloudinary.CloudinaryService;
+import AdvSe.LMS.courses.dtos.CreateLessonDto;
+import AdvSe.LMS.courses.dtos.UpdateLessonDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Lessons.Lesson;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
@@ -27,25 +29,9 @@ public class LessonsService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    private Lesson getCheckedLessonById(Integer course_id, Integer lesson_id, String instructorId) {
-        Lesson lesson = getLessonById(course_id, lesson_id);
-        if (!lesson.getCourse().getInstructor().getId().equals(instructorId))
-            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
-        return lesson;
-    }
-
-    public Lesson getLessonById(Integer course_id, Integer lesson_id) {
-        if (!courseRepository.existsById(course_id)) {
-            throw new ResponseStatusException(NOT_FOUND, "Course not found");
-        }
-
-        Lesson lesson = lessonsRepository.findById(lesson_id)
+    public Lesson getLessonById(Integer lessonId) {
+        return lessonsRepository.findById(lessonId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Lesson not found"));
-
-        if (!lesson.getCourse().getId().equals(course_id))
-            throw new ResponseStatusException(NOT_FOUND, "Lesson not found");
-
-        return lesson;
     }
 
     public List<Lesson> getLessonsByCourseId(Integer course_id) {
@@ -55,29 +41,17 @@ public class LessonsService {
         return course.getLessons();
     }
 
-    public Lesson createLesson(Integer course_id, String instructorId, String name, List<MultipartFile> files) {
-        Course course = courseRepository.findById(course_id)
+    public Lesson createLesson(CreateLessonDto createLessonDto) {
+        Course course = courseRepository.findById(createLessonDto.getCourseId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
 
-        if (!course.getInstructor().getId().equals(instructorId))
+        if (!course.getInstructor().getId().equals(createLessonDto.getInstructorId()))
             throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
 
         Lesson lesson = new Lesson();
         lesson.setCourse(course);
-        lesson.setName(name);
-        for (MultipartFile file : files) {
-            CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "lessons");
-            lesson.addLessonFile(cloudinaryFile);
-        }
-        return lessonsRepository.save(lesson);
-    }
-
-    public Lesson updateLesson(Integer course_id, String instructorId, Integer lesson_id, String name, List<MultipartFile> files) {
-        Lesson lesson = getCheckedLessonById(course_id, lesson_id, instructorId);
-
-        lesson.setName(name);
-        lesson.removeAllLessonFiles();
-        for (MultipartFile file : files) {
+        lesson.setName(createLessonDto.getName());
+        for (MultipartFile file : createLessonDto.getFiles()) {
             CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "lessons");
             lesson.addLessonFile(cloudinaryFile);
         }
@@ -85,8 +59,32 @@ public class LessonsService {
         return lessonsRepository.save(lesson);
     }
 
-    public void deleteLesson(Integer course_id, String instructorId, Integer lesson_id) {
-        Lesson lesson = getCheckedLessonById(course_id, lesson_id, instructorId);
+    public Lesson updateLesson(UpdateLessonDto updateLessonDto) {
+        Lesson lesson = getLessonById(updateLessonDto.getLessonId());
+
+        if (!lesson.getCourse().getInstructor().getId().equals(updateLessonDto.getInstructorId()))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+
+        if (updateLessonDto.getName() != null)
+            lesson.setName(updateLessonDto.getName());
+
+        if (updateLessonDto.getFiles() != null) {
+            lesson.getLessonFiles().clear();
+            for (MultipartFile file : updateLessonDto.getFiles()) {
+                CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "lessons");
+                lesson.addLessonFile(cloudinaryFile);
+            }
+        }
+
+        return lessonsRepository.save(lesson);
+    }
+
+    public void deleteLesson(Integer lessonId, String instructorId) {
+        Lesson lesson = getLessonById(lessonId);
+
+        if (!lesson.getCourse().getInstructor().getId().equals(instructorId))
+            throw new ResponseStatusException(FORBIDDEN, "This course does not belong to you");
+
         lessonsRepository.delete(lesson);
     }
 }

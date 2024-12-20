@@ -4,8 +4,8 @@ import AdvSe.LMS.courses.dtos.submissions.AssignmentSubmissionDto;
 import AdvSe.LMS.courses.entities.Questions.Submissions.AssignmentSubmission;
 import AdvSe.LMS.courses.services.AssignmentSubmissionsService;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -71,7 +71,7 @@ public class AssignmentSubmissionsController {
             @PathVariable("student_id") String student_id,
             @RequestBody AssignmentSubmissionDto assignmentSubmissionDto,
             @AuthenticationPrincipal User user
-            ) {
+    ) {
         return assignmentSubmisstionService.gradeAssignment(assignment_id, student_id, assignmentSubmissionDto, user.getUsername());
     }
 }

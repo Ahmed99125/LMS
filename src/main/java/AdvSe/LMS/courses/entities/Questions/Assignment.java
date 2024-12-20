@@ -3,7 +3,6 @@ package AdvSe.LMS.courses.entities.Questions;
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Questions.Submissions.AssignmentSubmission;
-import AdvSe.LMS.courses.entities.Questions.Submissions.QuizSubmission;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
