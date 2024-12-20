@@ -4,6 +4,7 @@ import AdvSe.LMS.courses.dtos.CreateLessonDto;
 import AdvSe.LMS.courses.dtos.UpdateLessonDto;
 import AdvSe.LMS.courses.entities.Lessons.Lesson;
 import AdvSe.LMS.courses.services.LessonsService;
+import AdvSe.LMS.users.entities.Student;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,6 +52,34 @@ public class LessonsController {
     ) {
         updateLessonDto.setInstructorId(user.getUsername());
         return lessonsService.updateLesson(updateLessonDto);
+    }
+
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
+    @GetMapping("/{lessonId}/otp")
+    String generateOTP(
+            @PathVariable("lessonId") Integer lessonId,
+            @AuthenticationPrincipal User user
+    ) {
+        return lessonsService.generateOTP(lessonId, user.getUsername());
+    }
+
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @GetMapping("/{lessonId}/attend")
+    String attendLesson(
+            @PathVariable("lessonId") Integer lessonId,
+            @RequestParam Integer otp,
+            @AuthenticationPrincipal User user
+    ) {
+        return lessonsService.attendLesson(lessonId, otp, user.getUsername());
+    }
+
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
+    @GetMapping("/{lessonId}/attendance")
+    List<Student> getAttendance(
+            @PathVariable("lessonId") Integer lessonId,
+            @AuthenticationPrincipal User user
+    ) {
+        return lessonsService.getAttendance(lessonId, user.getUsername());
     }
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")

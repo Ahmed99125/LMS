@@ -1,6 +1,7 @@
 package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
+import AdvSe.LMS.notifications.Notification;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,5 +1,6 @@
 package AdvSe.LMS.users.controllers;
 
+import AdvSe.LMS.notifications.Notification;
 import AdvSe.LMS.users.dtos.CreateUserDto;
 import AdvSe.LMS.users.dtos.UpdateProfileDto;
 import AdvSe.LMS.users.entities.Admin;
@@ -36,6 +37,11 @@ public class UsersController {
         this.studentsService = studentsService;
         this.instructorsService = instructorService;
         this.adminsService = adminService;
+    }
+
+    @GetMapping("/notifications")
+    public List<Notification> getNotifications(@AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
+        return usersService.getNotifications(user.getUsername());
     }
 
     @GetMapping("/profile")

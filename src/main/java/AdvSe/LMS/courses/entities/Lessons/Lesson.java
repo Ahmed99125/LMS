@@ -4,6 +4,7 @@ import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.users.entities.Student;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,9 @@ public class Lesson {
 
     @Column(nullable = false)
     private String name;
+
+    @JsonIgnore
+    private Integer OTP;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)

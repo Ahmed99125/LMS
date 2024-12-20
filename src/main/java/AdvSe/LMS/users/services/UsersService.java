@@ -2,6 +2,7 @@ package AdvSe.LMS.users.services;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.cloudinary.CloudinaryService;
+import AdvSe.LMS.notifications.Notification;
 import AdvSe.LMS.users.dtos.CreateUserDto;
 import AdvSe.LMS.users.dtos.UpdateProfileDto;
 import AdvSe.LMS.users.entities.User;
@@ -69,5 +70,10 @@ public class UsersService {
 
     public User getLoggedInUser(String userId) {
         return usersRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+    }
+
+    public List<Notification> getNotifications(String userId) {
+        User user = usersRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+        return user.getNotifications();
     }
 }

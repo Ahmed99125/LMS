@@ -1,5 +1,6 @@
-package AdvSe.LMS.users.entities;
+package AdvSe.LMS.notifications;
 
+import AdvSe.LMS.users.entities.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
