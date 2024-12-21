@@ -2,7 +2,6 @@ package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.utils.enums.QuestionType;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,6 +33,6 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Course course;
 }

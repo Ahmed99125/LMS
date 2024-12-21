@@ -1,7 +1,9 @@
 package AdvSe.LMS.courses.entities.Questions;
 
 import AdvSe.LMS.courses.entities.Course;
+import AdvSe.LMS.courses.entities.Questions.Submissions.QuizSubmission;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,6 +41,10 @@ public class Quiz {
     )
     @JsonManagedReference
     private List<Question> questions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<QuizSubmission> submissions = new ArrayList<>();
 
     public void addQuestion(Question question) {
         questions.add(question);

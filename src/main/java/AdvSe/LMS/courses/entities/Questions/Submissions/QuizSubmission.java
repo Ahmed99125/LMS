@@ -2,6 +2,7 @@ package AdvSe.LMS.courses.entities.Questions.Submissions;
 
 import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.users.entities.Student;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "quiz_submissions")
+@Table(
+        name = "quiz_submissions",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "quiz_id"})
+)
 public class QuizSubmission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,10 +29,12 @@ public class QuizSubmission {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
+    @JsonManagedReference
     private Student student;
 
     @ManyToOne
     @JoinColumn(name = "quiz_id", nullable = false)
+    @JsonBackReference
     private Quiz quiz;
 
     @OneToMany(mappedBy = "quizSubmission", cascade = CascadeType.ALL, orphanRemoval = true)

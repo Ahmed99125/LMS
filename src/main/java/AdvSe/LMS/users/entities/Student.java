@@ -2,8 +2,7 @@ package AdvSe.LMS.users.entities;
 
 import AdvSe.LMS.cloudinary.CloudinaryFile;
 import AdvSe.LMS.courses.entities.Course;
-import AdvSe.LMS.utils.enums.Role;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "students")
+@DiscriminatorValue("STUDENT")
 public class Student extends User {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -25,15 +24,11 @@ public class Student extends User {
             joinColumns = @JoinColumn(name = "student_id"), // Foreign key in join table for Student
             inverseJoinColumns = @JoinColumn(name = "course_id") // Foreign key in join table for Course
     )
-    @JsonManagedReference
+    @JsonBackReference
     private List<Course> courses = new ArrayList<>();
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Notification> notifications = new ArrayList<>();
-
-    public Student(String id, String name, String password, Role role, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
-        super(id, name, password, role, email, phone, profilePicture);
+    public Student(String id, String name, String password, String email, String phone, CloudinaryFile profilePicture, List<Course> courses) {
+        super(id, name, password, email, phone, profilePicture);
         this.courses = courses;
     }
 
@@ -43,13 +38,5 @@ public class Student extends User {
 
     public void removeCourse(Course course) {
         courses.remove(course);
-    }
-
-    public void addNotification(Notification notification) {
-        notifications.add(notification);
-    }
-
-    public void removeNotification(Notification notification) {
-        notifications.remove(notification);
     }
 }

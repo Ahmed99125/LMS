@@ -14,9 +14,7 @@ public class CreateCourseDto {
     @NotBlank
     private String name;
 
-    @NotBlank
     private String instructorId;
-
     private String description;
     private String courseCode;
 }

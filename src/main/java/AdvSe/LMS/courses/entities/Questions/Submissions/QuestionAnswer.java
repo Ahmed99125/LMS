@@ -25,6 +25,8 @@ public class QuestionAnswer {
 
     private String userAnswer;
 
+    private String correctAnswer;
+
     @ManyToOne
     @JoinColumn(name = "submission_id", nullable = false)
     @JsonBackReference

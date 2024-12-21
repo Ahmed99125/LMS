@@ -1,6 +1,7 @@
-package AdvSe.LMS.users.entities;
+package AdvSe.LMS.notifications;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import AdvSe.LMS.users.entities.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,17 +26,7 @@ public class Notification {
     private String message;
 
     @ManyToOne
-    @JoinColumn(name = "student_id")
-    @JsonBackReference
-    private Student student;
-
-    @ManyToOne
-    @JoinColumn(name = "instructor_id")
-    @JsonBackReference
-    private Instructor instructor;
-
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    @JsonBackReference
-    private Admin admin;
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 }

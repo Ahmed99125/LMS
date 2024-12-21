@@ -6,7 +6,7 @@ import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,11 +37,11 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "Instructor_id", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference
     private Instructor instructor;
 
     @ManyToMany(mappedBy = "courses")
-    @JsonBackReference
+    @JsonManagedReference
     private List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -49,7 +49,7 @@ public class Course {
     private List<Lesson> lessons = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Question> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
