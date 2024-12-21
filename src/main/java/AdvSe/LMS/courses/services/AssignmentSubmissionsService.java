@@ -12,6 +12,8 @@ import AdvSe.LMS.users.entities.Student;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import AdvSe.LMS.users.repositories.StudentsRepository;
+import AdvSe.LMS.notifications.NotificationsService;
 
 import java.util.List;
 
@@ -23,11 +25,15 @@ public class AssignmentSubmissionsService {
     private final AssignmentSubmissionsRepository assignmentSubmissionRepository;
     private final AssignmentsRepository assignmentsRepository;
     private final CloudinaryService cloudinaryService;
+    private final StudentsRepository studentsRepository;
+    private final NotificationsService notificationsService;
 
-    AssignmentSubmissionsService(AssignmentSubmissionsRepository assignmentSubmissionRepository, AssignmentsRepository assignmentsRepository, CloudinaryService cloudinaryService) {
+    AssignmentSubmissionsService(AssignmentSubmissionsRepository assignmentSubmissionRepository, AssignmentsRepository assignmentsRepository, CloudinaryService cloudinaryService, StudentsRepository studentsRepository, NotificationsService notificationsService) {
         this.assignmentSubmissionRepository = assignmentSubmissionRepository;
         this.assignmentsRepository = assignmentsRepository;
         this.cloudinaryService = cloudinaryService;
+        this.studentsRepository = studentsRepository;
+        this.notificationsService = notificationsService;
     }
 
     private Assignment getAssignmentOrThrow(Integer assignmentId) {
@@ -88,6 +94,12 @@ public class AssignmentSubmissionsService {
 
         assignmentSubmission.setScore(assignmentFeedbackDto.getScore());
         assignmentSubmission.setFeedback(assignmentFeedbackDto.getFeedback());
+        
+        Assignment assignment = getAssignmentOrThrow(assignmentFeedbackDto.getAssignmentId());
+        Student student = studentsRepository.findById(assignmentFeedbackDto.getStudentId()).orElse(null);
+        String title = assignment.getCourse().getName() + ": " + assignment.getName() + " feedback";
+        String message = "Your grade in assignment (" + assignment.getName() + ") is " + assignmentSubmission.getScore().toString() + ". Open to see what the instructor has to say.";
+        notificationsService.sendNotification(student, title, message);
 
         return assignmentSubmissionRepository.save(assignmentSubmission);
     }

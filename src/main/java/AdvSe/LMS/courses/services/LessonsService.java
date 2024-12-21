@@ -61,6 +61,12 @@ public class LessonsService {
             CloudinaryFile cloudinaryFile = cloudinaryService.uploadFile(file, "lessons");
             lesson.addLessonFile(cloudinaryFile);
         }
+        
+        // Send notification to all students in the course
+        
+        String title = lesson.getCourse().getName() + ": " + "New lesson added";
+        String message = "A new lesson (" + lesson.getName() + ") was added to " + course.getName() + " course.";
+        notificationsService.sendNotifications(lesson.getCourse().getStudents(), title, message);
 
         return lessonsRepository.save(lesson);
     }
@@ -81,7 +87,13 @@ public class LessonsService {
                 lesson.addLessonFile(cloudinaryFile);
             }
         }
-
+        
+        // Send notification to all students in the course
+        
+        String title = lesson.getCourse().getName() + ": " + "Lesson update";
+        String message = "Lesson (" + lesson.getName() + ") was updated in " + lesson.getCourse().getName() + " course.";
+        notificationsService.sendNotifications(lesson.getCourse().getStudents(), title, message);
+        
         return lessonsRepository.save(lesson);
     }
 

@@ -8,6 +8,8 @@ import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.repositories.AssignmentsRepository;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
+import AdvSe.LMS.notifications.NotificationsService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,14 +21,16 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class AssignmentsService {
-    private final AssignmentsRepository assignmentsRepository;
+	private final AssignmentsRepository assignmentsRepository;
     private final CoursesRepository courseRepository;
     private final CloudinaryService cloudinaryService;
+    private final NotificationsService notificationsService;
 
-    AssignmentsService(AssignmentsRepository assignmentsRepository, CoursesRepository courseRepository, CloudinaryService cloudinaryService) {
+    AssignmentsService(AssignmentsRepository assignmentsRepository, CoursesRepository courseRepository, CloudinaryService cloudinaryService, NotificationsService notificationsService) {
         this.assignmentsRepository = assignmentsRepository;
         this.courseRepository = courseRepository;
         this.cloudinaryService = cloudinaryService;
+        this.notificationsService = notificationsService;
     }
 
     public Assignment getAssignmentById(Integer assignmentId) {
@@ -75,6 +79,12 @@ public class AssignmentsService {
                 assignment.addAssignmentFile(cloudinaryFile);
             }
         }
+        
+        // Send notification to all students in the course
+        
+        String title = assignment.getCourse().getName() + ": " + "New assignment added";
+        String message = "A new assignment (" + assignment.getName() + ") was added to " + assignment.getCourse().getName() + " course.";
+        notificationsService.sendNotifications(assignment.getCourse().getStudents(), title, message);
 
         return assignmentsRepository.save(assignment);
     }

@@ -7,6 +7,8 @@ import AdvSe.LMS.courses.entities.Questions.Question;
 import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.courses.repositories.QuizzesRepository;
+import AdvSe.LMS.notifications.NotificationsService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,11 +23,14 @@ public class QuizzesService {
 
     private final QuizzesRepository quizzesRepository;
     private final CoursesRepository courseRepository;
+    private final NotificationsService notificationsService;
 
-    public QuizzesService(QuizzesRepository quizzesRepository, CoursesRepository courseRepository) {
+    public QuizzesService(QuizzesRepository quizzesRepository, CoursesRepository courseRepository, NotificationsService notificationsService) {
         this.quizzesRepository = quizzesRepository;
         this.courseRepository = courseRepository;
+        this.notificationsService = notificationsService;
     }
+
 
     public List<Quiz> getQuestionsByCourseId(Integer courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Course not found"));
@@ -57,6 +62,13 @@ public class QuizzesService {
         for (Question question : questions) {
             quiz.addQuestion(question);
         }
+        
+        // Send notification to all students in the course
+        
+        String title = quiz.getCourse().getName() + ": " + "New quiz added";
+        String message = "A new quiz (" + quiz.getName() + ") was added to " + quiz.getCourse().getName() + " course.";
+        notificationsService.sendNotifications(quiz.getCourse().getStudents(), title, message);
+        
         return quizzesRepository.save(quiz);
     }
 
