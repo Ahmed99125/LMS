@@ -8,12 +8,12 @@ import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.entities.Questions.Submissions.AssignmentSubmission;
 import AdvSe.LMS.courses.repositories.AssignmentSubmissionsRepository;
 import AdvSe.LMS.courses.repositories.AssignmentsRepository;
+import AdvSe.LMS.notifications.NotificationsService;
 import AdvSe.LMS.users.entities.Student;
+import AdvSe.LMS.users.repositories.StudentsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import AdvSe.LMS.users.repositories.StudentsRepository;
-import AdvSe.LMS.notifications.NotificationsService;
 
 import java.util.List;
 
@@ -94,7 +94,7 @@ public class AssignmentSubmissionsService {
 
         assignmentSubmission.setScore(assignmentFeedbackDto.getScore());
         assignmentSubmission.setFeedback(assignmentFeedbackDto.getFeedback());
-        
+
         Assignment assignment = getAssignmentOrThrow(assignmentFeedbackDto.getAssignmentId());
         Student student = studentsRepository.findById(assignmentFeedbackDto.getStudentId()).orElse(null);
         String title = assignment.getCourse().getName() + ": " + assignment.getName() + " feedback";

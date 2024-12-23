@@ -7,6 +7,7 @@ import AdvSe.LMS.users.entities.Admin;
 import AdvSe.LMS.users.entities.Instructor;
 import AdvSe.LMS.users.entities.Student;
 import AdvSe.LMS.users.entities.User;
+import AdvSe.LMS.users.repositories.UsersRepository;
 import AdvSe.LMS.users.services.AdminsService;
 import AdvSe.LMS.users.services.InstructorsService;
 import AdvSe.LMS.users.services.StudentsService;
@@ -27,12 +28,14 @@ import java.util.List;
 @RestController
 @RequestMapping("api/users")
 public class UsersController {
+    private final UsersRepository usersRepository;
     private final UsersService usersService;
     private final StudentsService studentsService;
     private final InstructorsService instructorsService;
     private final AdminsService adminsService;
 
-    public UsersController(UsersService usersService, StudentsService studentsService, InstructorsService instructorService, AdminsService adminService) {
+    public UsersController(UsersRepository usersRepository, UsersService usersService, StudentsService studentsService, InstructorsService instructorService, AdminsService adminService) {
+        this.usersRepository = usersRepository;
         this.usersService = usersService;
         this.studentsService = studentsService;
         this.instructorsService = instructorService;
@@ -81,6 +84,9 @@ public class UsersController {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public User register(@Valid @RequestBody CreateUserDto userDto) {
+        if (usersRepository.existsById(userDto.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
+        }
         return switch (userDto.getRole()) {
             case STUDENT -> studentsService.createStudent(userDto);
             case INSTRUCTOR -> instructorsService.createInstructor(userDto);

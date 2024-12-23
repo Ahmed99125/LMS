@@ -101,12 +101,12 @@ public class QuizSubmissionsService {
         }
         Double score = (correct * 100) / (double) numberOfQuestions;
         quizSubmission.setScore(score);
-        
-        
+
+
         String title = quiz.getCourse().getName() + ": " + quiz.getName() + " grade";
-        String message = "Your grade in quiz (" + quiz.getName() + ") is " + score.toString() + " out of 100.";
+        String message = "Your grade in quiz (" + quiz.getName() + ") is " + score + " out of 100.";
         notificationsService.sendNotification(student, title, message);
-        
+
         return quizSubmissionsRepository.save(quizSubmission);
     }
 }

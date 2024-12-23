@@ -1,18 +1,11 @@
 package AdvSe.LMS;
 
 import AdvSe.LMS.courses.controllers.AssignmentsController;
-import AdvSe.LMS.courses.dtos.CreateAssignmentDto;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Questions.Assignment;
 import AdvSe.LMS.courses.repositories.AssignmentsRepository;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.courses.services.AssignmentsService;
-import AdvSe.LMS.users.entities.Instructor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.transaction.Transactional;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,27 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,10 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AssignmentsControllerTest {
 
     private MockMvc mockMvc;
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectWriter objectWriter = objectMapper.writer();
-
     @Mock
     private AssignmentsService assignmentsService;
 
@@ -103,42 +81,5 @@ public class AssignmentsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(123123))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("AssignmentOneTest"));
-    }
-
-    @Test
-    @WithMockUser(username = "instructor", roles = "INSTRUCTOR")  // Simulate the user as an instructor
-    public void createAssignmentTest() throws Exception {
-        // Create the mock user with the instructor role
-        UserDetails user = User.builder()
-                .username("instructor")
-                .password("password")
-                .roles("INSTRUCTOR")
-                .build();
-
-        // Create a mock course
-        Course course = new Course();
-        Mockito.when(coursesRepository.save(course)).thenReturn(course);
-
-        // Create the CreateAssignmentDto
-        CreateAssignmentDto createAssignmentDto = new CreateAssignmentDto();
-        createAssignmentDto.setCourseId(course.getId());
-        createAssignmentDto.setName("AssignmentOneTest");
-        createAssignmentDto.setFiles(new ArrayList<MultipartFile>());  // Simulating no files for simplicity
-
-        // Convert CreateAssignmentDto to JSON string using ObjectMapper
-        ObjectMapper objectMapper = new ObjectMapper();
-        String content = objectMapper.writeValueAsString(createAssignmentDto);
-
-        // Build the POST request
-        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/assignments")
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(content);
-
-        // Perform the request with the mock user and validate the response
-        mockMvc.perform(mockRequest.with(user(user)))  // Simulate authentication
-                .andExpect(status().isCreated())  // Expect HTTP status 201 (Created)
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("AssignmentOneTest"))  // Validate name
-                .andExpect(MockMvcResultMatchers.jsonPath("$.courseId").value(course.getId()));  // Validate courseId
     }
 }

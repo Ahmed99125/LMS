@@ -8,7 +8,6 @@ import AdvSe.LMS.courses.entities.Questions.Quiz;
 import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.courses.repositories.QuizzesRepository;
 import AdvSe.LMS.notifications.NotificationsService;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -62,13 +61,13 @@ public class QuizzesService {
         for (Question question : questions) {
             quiz.addQuestion(question);
         }
-        
+
         // Send notification to all students in the course
-        
+
         String title = quiz.getCourse().getName() + ": " + "New quiz added";
         String message = "A new quiz (" + quiz.getName() + ") was added to " + quiz.getCourse().getName() + " course.";
         notificationsService.sendNotifications(quiz.getCourse().getStudents(), title, message);
-        
+
         return quizzesRepository.save(quiz);
     }
 
