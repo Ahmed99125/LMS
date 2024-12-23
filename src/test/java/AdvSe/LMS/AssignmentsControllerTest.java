@@ -3,8 +3,6 @@ package AdvSe.LMS;
 import AdvSe.LMS.courses.controllers.AssignmentsController;
 import AdvSe.LMS.courses.entities.Course;
 import AdvSe.LMS.courses.entities.Questions.Assignment;
-import AdvSe.LMS.courses.repositories.AssignmentsRepository;
-import AdvSe.LMS.courses.repositories.CoursesRepository;
 import AdvSe.LMS.courses.services.AssignmentsService;
 import jakarta.transaction.Transactional;
 import org.junit.Before;
@@ -33,12 +31,6 @@ public class AssignmentsControllerTest {
     private MockMvc mockMvc;
     @Mock
     private AssignmentsService assignmentsService;
-
-    @Mock
-    private AssignmentsRepository assignmentsRepository;
-
-    @Mock
-    private CoursesRepository coursesRepository;
 
     @InjectMocks
     private AssignmentsController assignmentsController;

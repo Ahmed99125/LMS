@@ -22,7 +22,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class) // Enables Mockito for JUnit 5 tests
+@ExtendWith(MockitoExtension.class)
 class LessonsControllerTest {
 
     private MockMvc mockMvc;
@@ -67,7 +67,6 @@ class LessonsControllerTest {
         lesson.setId(1);
         lesson.setName("Test Lesson");
 
-        // Mock the behavior for getLessonById
         when(lessonsService.getLessonById(anyInt())).thenReturn(lesson);
 
         mockMvc.perform(MockMvcRequestBuilders
